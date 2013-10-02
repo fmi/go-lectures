@@ -1,0 +1,209 @@
+Програмиране с Go
+01.10.2013
+
+fmi@golang.bg
+http://fmi.golang.bg/
+@fmi_golang
+
+* Здравейте
+
+Нека ви обясним къде сте попаднали.
+
+
+* Експериментален курс
+
+- За сефте ни е
+- Вие го играете опитни зайчета
+- Което означава, че постоянно ще искаме вашия feedback
+- Ако се издъним тази година, едва ли ще има следваща
+- Курсът ще е доста труден
+
+* Лекции
+
+- Вторник и четвъртък
+- От 19:00 до около 21:00
+- Зала 101
+
+_You_asked_me_once,_what_was_in_Room_101._I_told_you_that_you_knew_the_answer_already._Everyone_knows_it._The_thing_that_is_in_Room_101_is_the_worst_thing_in_the_world_
+
+_1984,_George_Orwell_
+
+
+* В интернеда
+
+.link http://fmi.golang.bg/
+
+.link http://twitter.com/fmi_golang @fmi_golang
+
+.link https://www.facebook.com/groups/fmi.golang/
+
+
+* Торонто
+
+Там пием бира след всяка лекция.
+
+
+* Походи
+
+Почти всеки уикенд (при адекватни климатични условия) ще ходим из разни гористи местности и ще се радваме, ако идвате с нас.
+
+_(Да,_можем_да_поемем_100_души_с_нас)_
+
+
+Когато времето е кофти, ще пием бира някъде.
+
+
+* Оценяване
+
+Ще събирате точки
+
+
+* Домашни
+
+- Шест броя
+- Всяко дава по 10 точки
+- Ако много ни радават решения, можем да даваме бонуси
+- Ако вършите глупости, вземаме точки
+- Предават се онлайн
+- Проверяват се автоматизирано
+- Стават публичния след крайния срок
+- Ако преписвате, ви късаме
+
+
+* Тестове
+
+- Два броя
+- 30 въпроса
+- 1 верен отговор = 1 точка
+
+
+* Проект
+
+- Трябва сами да си харесате тема
+- Ще ви дадем примерни
+- До Бъдни вечер трябва да сте ни изпратили своята идея
+- В някоя от първите учебни седмици на 2014 ще защитавате структурата на проекта
+- По време на сесията защитавате имплементация, тестове, стил...
+- Само миналите първата защита отиват на изпит
+- Oстаналите - септември
+
+
+* Но поне сме щедри с точките
+
+
+* Участие по време на лекция
+
+- Стела ще ни прави мъфини
+- Всеки мъфин има код
+- Всеки код носи точка
+- Даваме ги при добър въпрос или отговор на въпрос
+- Ще даваме мъфин и ако ни хванете в крачка
+
+
+* Участие в сайта
+
+- Добър пост във форумите (въпрос, отговор на въпрос или помощ на колега)
+- Добър коментар на чуждо решение
+- Предложена хитринка
+
+
+* Помощ с материалите
+
+- Качваме всяка лекция в GitHub
+- Поправяне на грешки
+- Примери от лекциите
+- Неща, които сме пропуснали
+
+
+* Предизвикателства
+
+- Малки или странни задачки
+- Не особено дълъг срок
+
+
+* Защо всичко трябва да бъде толкова сложно!?
+
+
+* Go
+
+
+* Малко история
+
+.image assets/creators.jpg
+
+
+* Малко история
+
+- *2007* - ражда се идеята
+- *2008* - стартира имплементирането на компилатора
+- *2009* - първи публичен релийз
+- *2010* - обявен за език на годината
+- *2011* - използва се в production среда от Google
+- *2012* - релийзнат е 1.0
+- *2013* - релийзнат е 1.1
+
+
+* C for the 21st century
+
+
+* "Трите свята"
+
+
+* Резултатът
+
+- Език с отворен код от ниско ниво
+- C-подобен синтаксис
+- Дълбоко залегнала идея за конкурентност
+- Вграден, бърз и ефективен garbage collector
+- Безумно бърза компилация
+- Създаден да scale-ва
+- Изключително опростен
+- UTF-8 by default
+
+
+* Стандартната библиотека
+
+archive tar zip bufio builtin bytes compress bzip2 flate gzip lzw
+zlib container heap list ring crypto aes cipher des dsa ecdsa
+elliptic hmac md5 rand rc4 rsa sha1 sha256 sha512 subtle tls
+x509 pkix database sql driver debug dwarf elf gosym macho pe
+encoding ascii85 asn1 base32 base64 binary csv gob hex json
+pem xml errors expvar flag fmt go ast build doc format parser
+printer scanner token hash adler32 crc32 crc64 fnv html
+template image color draw gif jpeg png index suffixarray io
+ioutil log syslog math big cmplx rand mime multipart net http
+cgi cookiejar fcgi httptest httputil pprof mail rpc jsonrpc smtp
+textproto url os exec signal user path filepath reflect regexp
+syntax runtime cgo debug pprof race sort strconv strings sync
+atomic syscall testing iotest quick text scanner tabwriter
+template parse time unicode utf16 utf8 unsafe
+
+
+* Научените уроци
+
+
+* Малко код
+
+    package workq
+
+    type Queue []*Item
+
+    func (q *Queue) Push(item *Item) {
+        *q = append(*q, item)
+        go item.Translate()
+    }
+
+    func (q *Queue) Pop() *Item {
+        if !q.IsEmpty() {
+            old := *q
+            item := old[0]
+            <- item.Done
+            *q = old[1:len(old)]
+            return item
+        }
+        return nil
+    }
+
+    func (q *Queue) Len() int {
+        return len(*q)
+    }
