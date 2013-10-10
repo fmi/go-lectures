@@ -94,7 +94,7 @@ http://fmi.golang.bg/
 
     func sum(args ...int) int
 
-Функцията sum приема произволен брой числа и връща техният сбор
+Функцията sum приема произволен брой числа и връща техния сбор
 
 .code code/02/lots_of_arguments.go /^func sum/,/^}/
 
