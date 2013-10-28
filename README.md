@@ -8,11 +8,10 @@
 Инсталация
 -----
 
-    go get code.google.com/p/go.tools/present
-    cd $GOPATH/src/code.google.com/p/go.tools/present
-    go get
-    go install
-
+	go get code.google.com/p/go.talks/present
+	cd $GOPATH/src/code.google.com/p/go.talks/present
+	go get
+	go install
 
 Употреба
 ------
