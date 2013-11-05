@@ -1,0 +1,203 @@
+Error Handling
+31.10.2013
+
+fmi@golang.bg
+http://fmi.golang.bg/
+@fmi_golang
+
+
+* Имало едно време чисто С
+
+- Неконсистентен `error`handling`
+- Понякога се приема аргумент по указател, в който се записва евентуална грешка
+- Понякога се ползва връщаната стойност
+- Понякога това е комбинирано с `errno`
+
+* Пример в C
+
+    #include <stdio.h>
+    #include <errno.h>
+    #include <string.h>
+
+    extern int errno;
+
+    int main ()
+    {
+        FILE* pf = fopen("unexist.txt", "rb");
+        if (pf == NULL)
+        {
+            fprintf(stderr, "Value of errno: %d\n", errno);
+            perror("Error printed by perror");
+            fprintf(stderr, "Error opening file: %s\n", strerror(errno));
+        }
+        else
+        {
+            fclose(pf);
+        }
+        return 0;
+    }
+
+* Имало едно време един език Go
+
+- Също (kind-of) неконсистентен `error`handling`
+- Не чак толкова. Има грубо-казано 2 начина
+- 1) Връщане на грешка като (част от) резултата от функция
+- 2) Паниране (не в смисъла на пиле)
+
+* Връщане на грешка
+
+- Има конвенция обектите, които се връщат, да отговарят на следния интерфейс:
+
+    type error interface {
+        Error() string
+    }
+
+- Разбира се, всеки може да връща "по-сложни" обекти, даващи повече информация за грешката. Например, `os.Open` връща `os.PathError`:
+
+    type PathError struct {
+        Op string    // "open", "unlink", etc.
+        Path string  // Файлът с грешката
+        Err error    // Грешката, върната от system call-a
+    }
+
+    func (e *PathError) Error() string {
+        return e.Op + " " + e.Path + ": " + e.Err.Error()
+    }
+
+* Стандартна употреба
+
+    func CreateFile(filename string) {
+        file, err = os.Create(filename)
+        if err == nil {
+            return
+        }
+        if e, ok := err.(*os.PathError); ok && e.Err == syscall.ENOSPC {
+            deleteTempFiles()
+            CreateFile(filename)
+        }
+    }
+
+
+* defer
+
+- `defer` добавя функцията, която сте подали, в един списък
+- Когато обграждащата функция приключи, тези функции се изпълняват в обратен ред
+- Използва се за най-разнообразно почистване на ресурси (отворени файлове, заключени `mutex-и`, принтиране на `footer-и` във функции, etc)
+- AKA Poor Man's RAII
+
+* Пример:
+
+    func CopyFile(dstName, srcName string) (written int64, err error) {
+        src, err := os.Open(srcName)
+        if err != nil {
+            return
+        }
+
+        dst, err := os.Create(dstName)
+        if err != nil {
+            return
+        }
+
+        written, err = io.Copy(dst, src)
+        dst.Close()
+        src.Close()
+        return
+    }
+
+* По-красивият, правилен и работещ начин е това:
+
+    func CopyFile(dstName, srcName string) (written int64, err error) {
+        src, err := os.Open(srcName)
+        if err != nil {
+            return
+        }
+        defer src.Close()
+
+        dst, err := os.Create(dstName)
+        if err != nil {
+            return
+        }
+        defer dst.Close()
+
+        return io.Copy(dst, src)
+    }
+
+* Доуточнения
+
+- `defer` statement-ите ни позволяват да мислим за затварянето на файловете веднага след отварянето им
+- Това ни гарантира, че няма да забравим в никой случай за затварянето им, независимо кой, кога и как променя кода след нас
+
+* Три прости правила за defer (1)
+
+- Аргументите на `defer` се оценяват, когато самият `defer` statement се оценява
+
+    func a() {
+        i := 0
+        defer fmt.Println(i)
+        i++
+        return
+    }
+
+- Това принтира "0"
+
+* Три прости правила за defer (2)
+
+- Функциите се изпълняват в `LIFO` ред
+
+    func b() {
+        for i := 0; i < 4; i++ {
+            defer fmt.Print(i)
+        }
+    }
+
+- Това изписва "3210"
+
+* Три прости правила за defer (3)
+
+- `defer` -натите функции могат да "пипат" по именованите връщани аргументи на обграждащата функция
+
+    func c() (i int) {
+        defer func() { i++ }()
+        return 1
+    }
+
+- Тази функция връща "2"
+- Това е удобно, за да променяме връщаните стойности от функции, примерно за да върнем грешка
+
+
+* Паника!
+
+- Нещо като изключенията
+- Ползваме ги само в крайни случаи (не като изключенията)
+- Изпадайки в паника, подавате стринг с грешката
+- Добрата новина е, че можете да се съвземате от тях... пак буквално
+
+
+* Уточнения
+
+- `panic` е вградена функция
+- Тя спира нормалното изпълнение на програмата
+- Когато функция F изпълни `panic`, изпълнението на F спира, всички `defer`-нати функции на F се изпълняват нормално, след което изпълнението се връща във функцията, извикала F
+- За извикващия на F, F е все едно извикване на `panic`
+- Това продължава, докато всички функции в текущата горутина (`thread`) не свършат, когато програмата гърми
+- Паники се случват след директното извикване на функцията `panic`, както и след разни runtime грешки, като `out-of-bounds`array`access`
+
+
+* recover
+
+- Съвзема от паника
+- `recover` е безполезен без `defer`
+- `recover` не прави нищо (връща `nil`), ако текущата горутина не е в паника
+- Ако е, `recover` връща аргумента, подаден на `panic`
+
+* Example (1)
+
+.play code/05/panic.go /^func g/,/^}/
+
+* Example (2)
+
+.play code/05/panic.go /^func f/,/^}/
+
+* Example (3)
+
+.play code/05/panic.go /^func main/,/^}/

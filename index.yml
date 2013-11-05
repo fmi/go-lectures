@@ -30,3 +30,7 @@
     title: 07. Как компютрите не работят (част 2)
     date: 2013-10-29
     url: http://lectures.fmi.golang.bg/07-how_computers_do_not_work_2.slide
+8:
+    title: 08. Error Handling
+    date: 2013-10-31
+    url: http://lectures.fmi.golang.bg/08-errors.slide
