@@ -192,12 +192,12 @@ http://fmi.golang.bg/
 
 * Example (1)
 
-.play code/05/panic.go /^func g/,/^}/
+.play code/08/panic.go /^func g/,/^}/
 
 * Example (2)
 
-.play code/05/panic.go /^func f/,/^}/
+.play code/08/panic.go /^func f/,/^}/
 
 * Example (3)
 
-.play code/05/panic.go /^func main/,/^}/
+.play code/08/panic.go /^func main/,/^}/
