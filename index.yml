@@ -34,3 +34,7 @@
     title: 08. Error Handling
     date: 2013-10-31
     url: http://lectures.fmi.golang.bg/08-errors.slide
+9:
+    title: 09. Concurrency 101
+    date: 2013-11-07
+    url: http://lectures.fmi.golang.bg/09-concurrency.slide
