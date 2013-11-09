@@ -159,7 +159,7 @@ slice1 := append(x, 4)
 * Методи за тези типове
 
     func (r *Rectangle) Circumference() int {
-        return r.x + r.y
+        return 2 * (r.x + r.y)
     }
 
     func (r *Triangle) Circumference() int {
