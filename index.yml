@@ -38,3 +38,7 @@
     title: 09. Concurrency 101
     date: 2013-11-07
     url: http://lectures.fmi.golang.bg/09-concurrency.slide
+10:
+    title: 10. Concurrency 102
+    date: 2013-11-13
+    url: http://lectures.fmi.golang.bg/10-concurrency102.slide
