@@ -42,3 +42,7 @@
     title: 10. Concurrency 102
     date: 2013-11-13
     url: http://lectures.fmi.golang.bg/10-concurrency102.slide
+11:
+    title: 11. Регулярни изрази
+    date: 2013-11-15
+    url: http://lectures.fmi.golang.bg/11-regexp.slide
