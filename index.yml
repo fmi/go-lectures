@@ -46,3 +46,7 @@
     title: 11. Регулярни изрази
     date: 2013-11-15
     url: http://lectures.fmi.golang.bg/11-regexp.slide
+12:
+    title: 12. Concurrency patterns
+    date: 2013-11-19
+    url: http://lectures.fmi.golang.bg/12-concurrency_patterns.slide
