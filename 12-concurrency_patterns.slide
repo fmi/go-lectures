@@ -36,7 +36,7 @@ a+b*a+
 В следния низ:
 bbbaaacccaaabbb
 
-- Само вторите "aaa"
+- Двете "aaa"
 
 
 * Въпрос за мъфин #5
@@ -46,7 +46,7 @@ bbbaaacccaaabbb
 В следния низ:
 aaabbffaac{aabbccsomething{
 
-- aac{
+- aaabbffaac{
 
 
 * Въпрос за мъфин #6
@@ -56,7 +56,7 @@ aaabbffaac{aabbccsomething{
 В следния низ:
 ababb
 
-- abab
+- ababb
 
 * Concurrency patterns
 
