@@ -50,3 +50,7 @@
     title: 12. Concurrency patterns
     date: 2013-11-19
     url: http://lectures.fmi.golang.bg/12-concurrency_patterns.slide
+13:
+    title: 13. Small libraries
+    date: 2013-11-29
+    url: http://lectures.fmi.golang.bg/13-small_libraries.slide
