@@ -54,3 +54,7 @@
     title: 13. Small libraries
     date: 2013-11-29
     url: http://lectures.fmi.golang.bg/13-small_libraries.slide
+14:
+    title: 14. Cgo
+    date: 2013-10-03
+    url: http://lectures.fmi.golang.bg/14-cgo.slide
