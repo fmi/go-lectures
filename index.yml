@@ -56,5 +56,9 @@
     url: http://lectures.fmi.golang.bg/13-small_libraries.slide
 14:
     title: 14. Cgo
-    date: 2013-10-03
+    date: 2013-12-03
     url: http://lectures.fmi.golang.bg/14-cgo.slide
+15:
+    title: 15. APIs
+    date: 2013-12-10
+    url: http://lectures.fmi.golang.bg/15-apis.slide
