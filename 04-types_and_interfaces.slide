@@ -86,12 +86,12 @@ http://fmi.golang.bg/
 
     func Abs(i integer) integer {
         switch {
-            case i < 0:
-                return -i
-            case i == 0:
-                return 0
-            default:
-                return i
+        case i < 0:
+            return -i
+        case i == 0:
+            return 0
+        default:
+            return i
         }
     }
 
@@ -106,12 +106,12 @@ http://fmi.golang.bg/
 
     func (i integer) Abs() integer {
         switch {
-            case i < 0:
-                return -i
-            case i == 0:
-                return 0
-            default:
-                return i
+        case i < 0:
+            return -i
+        case i == 0:
+            return 0
+        default:
+            return i
         }
     }
 
