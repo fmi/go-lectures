@@ -18,3 +18,7 @@
     title: 04. Типове и интерфейси
     date: 2014-10-16
     url: http://lectures.fmi.golang.bg/04-types_and_interfaces.slide
+5:
+    title: 05. Обработване на грешки
+    date: 2014-10-22
+    url: http://lectures.fmi.golang.bg/05-errors.slide
