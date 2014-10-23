@@ -22,3 +22,7 @@
     title: 05. Обработване на грешки
     date: 2014-10-22
     url: http://lectures.fmi.golang.bg/05-errors.slide
+6:
+    title: 06. Тестове и документация
+    date: 2014-10-23
+    url: http://lectures.fmi.golang.bg/06-testing.slide
