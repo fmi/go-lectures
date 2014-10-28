@@ -20,9 +20,14 @@
     url: http://lectures.fmi.golang.bg/04-types_and_interfaces.slide
 5:
     title: 05. Обработване на грешки
-    date: 2014-10-22
+    date: 2014-10-21
     url: http://lectures.fmi.golang.bg/05-errors.slide
 6:
     title: 06. Тестове и документация
     date: 2014-10-23
     url: http://lectures.fmi.golang.bg/06-testing.slide
+7:
+    title: 07. Конкурентност 101
+    date: 2014-10-28
+    url: http://lectures.fmi.golang.bg/07-concurrency101.slide
+
