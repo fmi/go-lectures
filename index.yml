@@ -34,3 +34,7 @@
     title: 08. Конкурентност 102
     date: 2014-10-30
     url: http://lectures.fmi.golang.bg/08-concurrency102.slide
+9:
+    title: 09. Регулярни изрази
+    date: 2014-11-18
+    url: http://lectures.fmi.golang.bg/09-regexp.slide
