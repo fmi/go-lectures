@@ -38,3 +38,19 @@
     title: 09. Регулярни изрази
     date: 2014-11-18
     url: http://lectures.fmi.golang.bg/09-regexp.slide
+10:
+    title: 10. Как (не) работят компютрите
+    date: 2014-12-02
+    url: http://lectures.fmi.golang.bg/10-how_computers_do_not_work.slide
+11:
+    title: 11. Интересни имплементационни детайли в Go
+    date: 2014-12-04
+    url: http://lectures.fmi.golang.bg/11-optimizations.slide
+12:
+    title: 12. Как (не) работят компютрите (2)
+    date: 2014-12-09
+    url: http://lectures.fmi.golang.bg/12-how_computers_do_not_work_2.slide
+13:
+    title: 13. Мрежово програмиране
+    date: 2014-12-11
+    url: http://lectures.fmi.golang.bg/13-network-programming.slide
