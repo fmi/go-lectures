@@ -45,14 +45,14 @@ http://fmi.golang.bg/
 
 * Клиентска част
 
-.play code/17/http-client.go /^import/,/^}/
+.play code/18/http-client.go /^import/,/^}/
 
 - Не е интересно, всички сте го правили
 - Ако не сте, има методи за всеки HTTP глагол. `net.Post`, `net.Delete`, `net.Put` и т.н.
 
 * Интересна част
 
-.play code/17/http-server.go /func main/,/^}/
+.play code/18/http-server.go /func main/,/^}/
 
 * http.ResponseWriter
 
@@ -225,7 +225,7 @@ http://fmi.golang.bg/
 
 * "Hello, World!" с Negroni
 
-.play code/17/negroni-hello-world.go
+.play code/18/negroni-hello-world.go
 
 
 * Gin Gonic
