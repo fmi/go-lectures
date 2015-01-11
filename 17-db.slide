@@ -1,0 +1,294 @@
+Бази данни
+06.01.2014
+
+fmi@golang.bg
+http://fmi.golang.bg/
+@fmi_golang
+
+
+* Бази данни: Кратка история
+
+- Текстови файлове (като CSV)
+- Key-value stores (BerkleyDB, Redis, shelve)
+- Обектни бази данни
+- Релационни бази данни (MySQL, SQLite, PostgreSQL, Oracle)
+- Документни бази данни (MongoDB, CouchDB)
+
+
+* Видове схеми (schema)
+
+(Схема - структурата на една база данни)
+
+Фиксирана схема
+
+- Силна, добре обмислена структура
+- Базата гарантира валидността на данните
+- Нормализация (данните не се повтарят)
+- Опит, стабилност и традиции
+
+Но...
+
+- Промените по схемата са тромави до невъзможни
+- Денормализация
+
+
+* Видове схеми 2
+
+Динамична схема
+
+- Key-value и документни бази данни
+- Структурата е по конвенция
+- Бързо разработка и лесни промени
+- Гъвкави типове данни
+
+Но...
+
+- Няма стандарт и портабилност
+- По-малко помощни технологии
+- Сами гарантирате интегритета на данните
+- Кодът ви трябва да очаква много повече специални случаи
+
+
+* Защо релационни бази данни?
+
+- Доказан вариант
+- Интегритет
+- ACID: Atomicity, Consistency, Isolation, Durability
+- Всеки програмист може да работи с тях
+- Ако не ни кефи релационният модел имаме ORM
+
+
+* Релационни бази данни с Go
+
+Пакетът `database/sql` се стреми да предостави унифициран интерфейс към тях
+
+- Предоставя универсален интерфейс, който да се използва от драйверите
+- Спазва конвенциите на Go
+- Грижи се основно за общите случаи, оставяйки подробностите за отделните драйвери
+- Служи за абстракция между имплементационни детайли и интерфейс от високо ниво
+- Грижи се за кастването към типовете, от които базите разбират
+- Създадено за конкурентна среда
+
+.link http://golang.org/src/database/sql/doc.txt
+
+
+* database/sql
+
+Типове за:
+
+- Връзка/и към конкретна база данни
+- Транзакция
+- Твърдение (Statement)
+- Резултат
+- Ред(ове)
+- Кастване до DB-типове
+
++ известно количество помощтни функции
+
+
+* Създаване на връзка към база
+
+	db, err := sql.Open(driver, dataSourceName)
+
+Вярвате или не това не отваря директно връзка...
+
+докато това не е нужно.
+
+
+* Изпълняване на заявки
+
+	result, err := db.Exec(
+		"INSERT INTO users (name, age) VALUES (?, ?)",
+		"gopher",
+		27,
+	)
+
+
+* Ако очакваме резултат
+
+	var age int64
+	row := db.QueryRow("SELECT age FROM users WHERE name = ?", name)
+	err := row.Scan(&age)
+
+
+* Ако очакваме резултатИ
+
+	rows, err := db.Query("SELECT name FROM users WHERE age = ?", age)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("%s is %d\n", name, age)
+	}
+	if err := rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+
+* Statements
+
+	age := 27
+	stmt, err := db.Prepare("SELECT name FROM users WHERE age = ?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	rows, err := stmt.Query(age)
+	// process rows
+
+
+* Транзакции
+
+	tx, err := db.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+Всяка транзакция трябва да приключи с `Commit` или `Rollback`
+
+
+* Справяне с null
+
+	var name NullString
+	err := db.QueryRow("SELECT name FROM names WHERE id = ?", id).Scan(&name)
+	...
+	if name.Valid {
+		// има валидна стойност в name.String
+	} else {
+		// NULL
+	}
+
+
+* Драйвери
+
+- MySQL (pure Go): https://github.com/go-sql-driver/mysql/
+- MySQL (cgo): https://github.com/ziutek/mymysql
+- Postgres (pure Go): https://github.com/lib/pq
+- Postgres (cgo): https://github.com/jbarham/gopgsqldriver
+- SQLite: https://github.com/mattn/go-sqlite3
+- DB2: https://bitbucket.org/phiggins/db2cli
+- MS ADODB: https://github.com/mattn/go-adodb
+- ODBC: https://bitbucket.org/miquella/mgodbc
+- Oracle: https://github.com/mattn/go-oci8
+-...
+
+.link https://github.com/bradfitz/go-sql-test
+
+
+* ORM
+
+.link https://github.com/coopernurse/gorp
+
+* Но...
+
+- Лесно се ползват, трудно се ползват правилно
+- Data Definition Language е сложен
+- Data Modification Language е още по-сложен
+- LEFT INNER JOIN? RIGHT OUTER JOIN?
+- Нормализация (1NF, 2NF, 3NF, EKNF, BCNF, 4NF, 5NF, DKNF, 6NF)
+- Индекси
+- Транзакции
+- Нива на изолации
+- Triggers
+- ORM...
+
+
+* Key-value Stores
+
+Имате всичко на всичко две операции:
+
+- get(key)
+- set(key, value)
+
+
+* Документни бази данни
+
+- Като key-value store, но със структурирани стойности.
+- Стойностите са JSON (ама не баш) документи.
+- Отделните полета могат да съдържат сложни обекти (няма нужда от релации).
+- Може да се търси и индексира по отделни полета в документа.
+- Могат да се променят отделни полета в документа.
+
+
+* Mongo
+
+.link http://mongodb.org
+
+- Клиент/сървър документна база данни
+- Бърза разработка
+- Стабилна - ползва се в големи сайтове
+- Удобен език за търсене и редактиране
+- Репликация и многосървърна работа, търсене, записване на файлове, MapReduce, и т.н.
+- Memory-mapped files
+- GridFS
+- Feature-rich
+
+
+* Как се казват нещата в Mongo
+
+- Наименовани бази (пр. "myapp")
+- ...съдържат наименовани колекции (пр. "users")
+- ...съдържат записи с ключ и документ в BSON (пр. ключ "25")
+
+
+* Типове данни
+
+- null
+- bool
+- int
+- float
+- date
+- string
+- nested docs
+- regexp!!!
+- JavaScript код!??!?
+
+
+* Операции
+
+- collection.insert(value)
+- collection.find_one({conditions})
+- collection.find({conditions})
+- collection.update({conditions}, {changes})
+- collection.save({document})
+
+
+* Модификатори
+
+- $set
+- $unset
+- $push
+- $pull
+- $inc
+- $rename
+- $each
+- $slice
+- $sort
+- $gt, $lt
+- $in, $or, $and
+- $where
+
+
+* Репликация
+
+- master → slave
+- replica set
+- auto-sharding
+
+
+* Ключове и стойности
+
+- Стойноста на всеки Mongo запис е JSON-подобен обект
+- Ключът на всеки запис е или случайно избран, или стойноста на полето _id в обекта
+- Случайно избраните ключове изглеждат така: 4c2209f9f3924d31102bd84a и са тип ObjectId
+
+* Tiedot
+
+Едни надъхани типове са решили да си направят собствена NoSQL база данни:
+
+.link https://github.com/HouzuoGuo/tiedot
+
+Между нас казано, не вярваме, че става за нещо...

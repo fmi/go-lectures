@@ -1,0 +1,264 @@
+Web програмиране
+08.01.2014
+
+fmi@golang.bg
+http://fmi.golang.bg/
+@fmi_golang
+
+* HTTP
+
+* Протокола
+
+- Client-Server
+- Stateless
+- Използва се за много повече неща от колкото някой е очаквал
+- Справя се брилянтно
+- ... имайки предвид, че никой не е очаквал
+
+* Версии
+
+- Коя точно ползваме?
+- RFC1945 (1995-6) - 1.0
+- RFC2616 (1999) - 1.1
+- RFC7230 до RFC7237 (2014) - 1.1 (пак!?)
+- 2.0 - очаквайте скоро по домовете си
+
+* Всичките ли ги ползваме?
+
+- Да
+- За щастие са backward compatible
+- Това интересува ли ни? В Go - рядко.
+
+* В Go си имаме библиотека
+
+- Познахте - `net/http`
+- Може да се ползва за HTTP клиент
+- Както и да си направите сървър
+- Крие от вас различните версии
+- Може да си се занимавате с тях ако искате
+
+* Защо!?
+
+- Езика има имплементация на някакъв си протокол в стандартната библитеока?
+- Защо не е third-party?
+- HTTP е толкова проникнал в света ни, че всеки уважаващ се език трябва да се справя с него добре
+
+* Клиентска част
+
+.play code/17/http-client.go /^import/,/^}/
+
+- Не е интересно, всички сте го правили
+- Ако не сте, има методи за всеки HTTP глагол. `net.Post`, `net.Delete`, `net.Put` и т.н.
+
+* Интересна част
+
+.play code/17/http-server.go /func main/,/^}/
+
+* http.ResponseWriter
+
+	type ResponseWriter interface {
+	    // Header returns the header map that will be sent by WriteHeader.
+	    Header() Header
+
+	    // Write writes the data to the connection as part of an HTTP reply.
+	    Write([]byte) (int, error)
+
+	    // WriteHeader sends an HTTP response header with status code.
+	    WriteHeader(int)
+	}
+
+- В такова нещо пишете отговора на HTTP request
+- Ще забележите, че всичко имплементиращо го ще имплементира и Writer
+
+* http.Request
+
+- Представя HTTP request получен от сървъра или такъв, който ще бъде изпратен от клиент (http.Client)
+- Някои от полетата му имат различно значение в двата случая
+- Всичко, което знаете за request-a е записано в такава структура
+
+* Ами GET, POST параметрите? Формите?
+
+- Те също
+- Когато пишете сървър:
+
+	err := req.ParseForm()
+	// handle if err != nil
+	user := req.Form.Get("username")
+
+* Повече от един начин да одереш котка
+
+- Request.Form от тип url.Values
+- Request.PostForm от тип url.Values
+- Request.Body от тип io.ReadCloser
+- Request.MultipartForm от тип *multipart.Form след извикване на ParseMultipartForm
+
+* HTTPS
+
+- Това пък какво е?
+- Колко версии има и то?
+- И за него е помислено в `net/http`
+
+	func ListenAndServeTLS(addr string, certFile string, keyFile string, handler Handler) error
+
+* Demo Webserver
+
+* Темплейти
+
+- Не искаме да смесваме бизнес логиката с представянето на данните
+- Искаме визуализацията да е на друго място и просто да получава информация какво да покаже
+- text/template
+- Говорейки за "визуализация" в браузър имаме предвид HTML
+- html/template
+
+* Пример
+
+Темплейт:
+
+	<h1>Editing {{.Title}}</h1>
+
+	<form action="/save/{{.Title}}" method="POST">
+	<div><textarea name="body" rows="20" cols="80">{{printf "%s" .Body}}</textarea></div>
+	<div><input type="submit" value="Save"></div>
+	</form>
+
+
+Изполването му:
+
+	func editHandler(w http.ResponseWriter, r *http.Request) {
+		p := &Page{
+			Title: "Hello, world!",
+			Body: "Lorem ipsum dolor sit amet...",
+		}
+		t, _ := template.ParseFiles("edit.html")
+		t.Execute(w, p)
+	}
+
+
+* text/template vs html/template
+
+`text/template`
+
+	import "text/template"
+	...
+	t, err := template.New("foo").Parse(`{{define "T"}}Hello, {{.}}!{{end}}`)
+	err = t.ExecuteTemplate(out, "T", "<script>alert('you have been pwned')</script>")
+
+
+
+	Hello, <script>alert('you have been pwned')</script>!
+
+`html/template`
+
+	import "html/template"
+	...
+	t, err := template.New("foo").Parse(`{{define "T"}}Hello, {{.}}!{{end}}`)
+	err = t.ExecuteTemplate(out, "T", "<script>alert('you have been pwned')</script>")
+
+
+
+	Hello, &lt;script&gt;alert(&#39;you have been pwned&#39;)&lt;/script&gt;!
+
+* Сигурност и escaping
+
+- Както се вижда, `html/template` се грижи всичко да е правилно escape-нато
+- За `O'Reilly: How are <i>you</i>?` ще направи:
+
+	Context                          {{.}} After
+	{{.}}                            O'Reilly: How are &lt;i&gt;you&lt;/i&gt;?
+	<a title='{{.}}'>                O&#39;Reilly: How are you?
+	<a href="/{{.}}">                O&#39;Reilly: How are %3ci%3eyou%3c/i%3e?
+	<a href="?q={{.}}">              O&#39;Reilly%3a%20How%20are%3ci%3e...%3f
+	<a onx='f("{{.}}")'>             O\x27Reilly: How are \x3ci\x3eyou...?
+	<a onx='f({{.}})'>               "O\x27Reilly: How are \x3ci\x3eyou...?"
+	<a onx='pattern = /{{.}}/;'>     O\x27Reilly: How are \x3ci\x3eyou...\x3f
+
+
+* Алтернативи от по-високо ниво
+
+- Gorilla
+- Beego
+- Martini
+- Negroni
+- Gin Gonic
+
+* Gorilla
+
+Няколко библиотеки, които ще улеснят живота ви по темата
+
+- gorilla/context
+- gorilla/mux
+- gorilla/reverse
+- gorilla/rpc
+- gorilla/schema
+- gorilla/securecookie
+- gorilla/sessions
+
+.link http://www.gorillatoolkit.org/
+
+* Beego
+
+- Full-blown MVC framework
+- Има си логове, сесии, кеш...
+- Има си даже и собствен ORM
+- Въпреки това се стреми да спазва "the go way"
+
+.link http://beego.me/
+
+* Martini
+
+- Най-противоречивата алтернатива
+- Основава се на безброй хакове и дори заобикаля статичната типизация на места
+- Тежък dependency injection
+- Половин година след създаването ѝ нейният автор я определя като "неидиоматично решение"
+
+.link http://martini.codegangsta.io/
+
+* Negroni
+
+- "Идиоматичната" алтернатива на martini
+- Пълна съвместимост с `net/http`
+- Изключително опростена
+- Можем да го разглеждаме просто като `middleware`
+
+.link http://negroni.codegangsta.io/
+
+
+* "Hello, World!" с Negroni
+
+.play code/17/negroni-hello-world.go
+
+
+* Gin Gonic
+
+- Създаден като алтернатива на martini
+- Оправя се с паники
+- Интересен error handling
+- Има си свои render-и
+- Рутира по групи, с интересен синтаксис
+
+.link http://gin-gonic.github.io/gin/
+
+* Gin Gonic routing
+
+	func main() {
+		r := gin.Default()
+
+		// Simple group: v1
+		v1 := r.Group("/v1")
+		{
+			v1.POST("/login", loginEndpoint)
+			v1.POST("/submit", submitEndpoint)
+			v1.POST("/read", readEndpoint)
+		}
+
+		// Simple group: v2
+		v2 := r.Group("/v2")
+		{
+			v2.POST("/login", loginEndpoint)
+			v2.POST("/submit", submitEndpoint)
+			v2.POST("/read", readEndpoint)
+		}
+
+		// Listen and server on 0.0.0.0:8080
+		r.Run(":8080")
+	}

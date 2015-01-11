@@ -62,7 +62,15 @@
     title: 15. Cgo
     date: 2014-12-18
     url: http://lectures.fmi.golang.bg/15-cgo.slide
-99:
-    title: 99. Интересни неща в go toolkit-а
+16:
+    title: 16. Интересни неща в go toolkit-а
     date: 2014-11-20
     url: http://lectures.fmi.golang.bg/99-tools.slide
+17:
+    title: 17. Бази данни
+    date: 2015-01-06
+    url: http://lectures.fmi.golang.bg/17-db.slide
+18:
+    title: 18. Web програмиране
+    date: 2015-01-06
+    url: http://lectures.fmi.golang.bg/18-web-programming.slide
