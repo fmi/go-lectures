@@ -2,4 +2,8 @@
     title: 00. Нулева лекция
     date: 2015-10-06
     url: http://lectures.fmi.golang.bg/00-course-info.slide
+1:
+    title: 01. Въведение в Go
+    date: 2015-10-13
+    url: http://lectures.fmi.golang.bg/01-intro.slide
 

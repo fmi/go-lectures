@@ -1,0 +1,569 @@
+Въведение в Go
+13.10.2015
+
+http://play.golang.org/
+
+fmi@golang.bg
+http://fmi.golang.bg/
+@fmi_golang
+
+* Малко история
+
+.image assets/creators.jpg
+
+
+* Малко история
+
+- *2007* - ражда се идеята
+- *2008* - стартира имплементирането на компилатора
+- *2009* - първи публичен релийз
+- *2010* - обявен за език на годината
+- *2011* - използва се в production среда от Google
+- *2012* - релийзната е 1.0
+- *2013* - релийзната е 1.1
+- *2014* - релийзнати са 1.3 и 1.4
+- *2015* - релийзната е 1.5
+
+
+* C for the 21st century
+
+- C е на *43*години*
+- *Хардуерът* се променя
+- *Проблемите*, които решаваме, също
+
+
+* "Трите свята"
+
+- C/C++: Бързо изпълнение, за сметка на бавна разработка, бавна компилация и не особено тривиален контрол над зависимостите
+- Java/C#: По-ефективен процес на разработка, компилация и контрол над зависимостите, за сметка на изпълнение
+- Python/Ruby: Изключително ефективен процес на разработка, без стъпка на компилация, но изключително бавно изпълнение
+
+- *: Трудна паралелизация и ефективност в мултипроцесорни системи
+
+
+* Резултатът
+
+- Език с отворен код от ниско ниво
+- C-подобен синтаксис
+- Дълбоко залегнала идея за конкурентност
+- Вграден, бърз и ефективен garbage collector
+- Безумно бърза компилация
+- Създаден да scale-ва
+- Изключително опростен
+- UTF-8 by default
+
+
+* Стандартната библиотека
+archive tar zip bufio builtin bytes compress bzip2 flate gzip lzw zlib
+container heap list ring crypto aes cipher des dsa ecdsa elliptic hmac
+md5 rand rc4 rsa sha1 sha256 sha512 subtle tls x509 pkix database sql
+driver debug dwarf elf gosym macho pe plan9obj encoding ascii85 asn1
+base32 base64 binary csv gob hex json pem xml errors expvar flag fmt
+go ast build constant doc format importer parser printer scanner token
+types hash adler32 crc32 crc64 fnv html template image color palette
+draw gif jpeg png index suffixarray io ioutil log syslog math big cmplx
+rand mime multipart quotedprintable net http cgi cookiejar fcgi httptest
+httputil pprof mail rpc jsonrpc smtp textproto url os exec signal user
+path filepath reflect regexp syntax runtime cgo debug pprof race trace
+sort strconv strings sync atomic syscall testing iotest quick text
+scanner tabwriter template parse time unicode utf16 utf8 unsafe
+
+* Научените уроци
+
+
+* Малко код
+
+    package workq
+
+    type Queue []*Item
+
+    func (q *Queue) Push(item *Item) {
+        *q = append(*q, item)
+        go item.Translate()
+    }
+
+    func (q *Queue) Pop() *Item {
+        if !q.IsEmpty() {
+            old := *q
+            item := old[0]
+            <- item.Done
+            *q = old[1:len(old)]
+            return item
+        }
+        return nil
+    }
+
+    func (q *Queue) Len() int {
+        return len(*q)
+    }
+
+* Защо Go?
+
+* Състезание по популярност
+
+* Go vs Java в Google Trends
+
+.image assets/java-vs-golang.png
+
+* Да сложим и C++ в картинката
+
+.image assets/java-vs-cpp-vs-golang.png
+
+* Първата производна
+
+.image assets/golang-only.png
+
+* Инсталация
+
+*** Linux, FreeBSD
+
+Инсталирате си пакета `go` от вашия пакетен мениджър
+
+*** Mac OSX
+
+.link https://golang.org/dl/ Използвате симпатичния инсталатор
+
+*** Windows
+
+.link https://golang.org/dl/ Използвате симпатичния инсталатор
+
+По време на курса ще използваме версия 1.5.1
+
+
+* Инсталация, епизод 2
+
+1. Създавате директория `~/go`
+2. Слагате следните два реда в `~/.profile`
+
+    export GOPATH=$HOME/go
+    export PATH=$PATH:$GOPATH/bin
+
+*** За Windows-аджийте има уловки:
+
+- Инсталаторът е избрал `C:\Go` вместо вас и можете да ползвате нея
+- Операционната ви система е дошла с инсталиран PowerShell
+- Запознайте се с него и се научете да го ползвате.
+
+
+* Hello, world!
+
+За да сме сигурни, че сме направили всичко като хората, създаваме файл hello.go:
+
+.play code/01/hello_world.go
+
+и изпълняваме
+
+    go run hello.go
+
+Ако всичко изглежда наред, правим скрийншот и получаваме точка :)
+
+
+* Как да пишем код на Go?
+
+Имаме инструментът `go`, който се грижи за достатъчно много неща.
+Повечето настройки се правят с `environment`variables`.
+`workspace`, с три основни директории:
+
+- `src` съдържа нашия сорс код, който е организиран в пакети (за тях след малко)
+- `pkg` съдържа т.нар. `package`objects`
+- `bin` съдържа компилираните ни програми
+
+
+* $ go
+
+    build       compile packages and dependencies
+    clean       remove object files
+    doc         show documentation for package or symbol
+    env         print Go environment information
+    fix         run go tool fix on packages
+    fmt         run gofmt on package sources
+    generate    generate Go files by processing source
+    get         download and install packages and dependencies
+    install     compile and install packages and dependencies
+    list        list packages
+    run         compile and run Go program
+    test        test packages
+    tool        run specified go tool
+    version     print Go version
+    vet         run go tool vet on packages
+
+.link http://golang.org/cmd/go/
+
+
+* Environment variables
+
+    $ go env
+    GOARCH="amd64"
+    GOBIN=""
+    GOEXE=""
+    GOHOSTARCH="amd64"
+    GOHOSTOS="linux"
+    GOOS="linux"
+    GOPATH="/home/user/go"
+    GORACE=""
+    GOROOT="/usr/lib/go"
+    GOTOOLDIR="/usr/lib/go/pkg/tool/linux_amd64"
+    GO15VENDOREXPERIMENT=""
+    CC="gcc"
+    GOGCCFLAGS="-fPIC -m64 -pthread -fmessage-length=0"
+    CXX="g++"
+    CGO_ENABLED="1"`
+
+
+* workspace
+
+    bin/
+        streak                         # command executable
+    pkg/
+        linux_amd64/
+            code.google.com/p/goauth2/
+                oauth.a                # package object
+    src/
+        code.google.com/p/goauth2/
+            .hg/                       # mercurial repository metadata
+            oauth/
+                oauth.go               # package source
+                oauth_test.go          # test source
+        github.com/nf/
+            streak/
+                .git/                  # git repository metadata
+                oauth.go               # command source
+                streak.go              # command source
+
+.link http://golang.org/doc/code.html#Workspaces
+
+
+* Браво. И сега какво?
+
+Връщаме се обратно към _Hello,_world!_ примера:
+
+.code code/01/hello_world.go
+
+и се фокусираме върху
+
+    package main
+
+
+* Пакети
+
+Една програма на `Go` е структура от пакети. Нямате шанс просто да хвърлите
+едно парче код, в даден файл и то да тръгне.
+
+- Ако идвате от Python, си мислите за модули.
+- Ако идвате от Java, се чувствайте като у дома си
+
+
+* Особености
+
+- Всеки файл принадлежи на точно един пакет
+- `n` файла могат да са в един пакет (демек `filename` != `package`)
+- Стандартната библиотека е съставена от пакети като `fmt`, `os`...
+- По конвенция, всяка директория съдържа точно един пакет
+- Очевидно, дадени пакети могат да използват други
+
+Без значение от колко файла се състои:
+
+- всеки пакет се компилира като една самостоятелна единица
+- всичко, дефинирано в пакета, има видимимост във всички негови файлове
+
+
+* One package to rule them all
+
+Ако си мислите за "Lord of the rings", грешите. Говорим ви за `main`.
+
+В една програма имаме точно един пакет `main` и при изпълнението ѝ се изпълнява функцията `main` в него.
+
+Програмата приключва, когато приключи изпълнението на функцията `main`.
+
+Тя *не* връща нищо.
+
+
+* Преизползване на пакети
+
+Става с ключовата думичка `import`, последвана от името на пакета, в кавички
+
+    import "fmt"
+
+Ако искаме да импортнем няколко пакета:
+
+    import "fmt"
+    import "os"
+
+което go fmt би свел до
+
+    import (
+        "fmt"
+        "os"
+    )
+
+
+* import
+
+- По време на компилация се компилират първо импортнатите пакети
+- Всеки пакет се компилира *точно* един път
+- Ако един пакет се промени и прекомпилира, всички пакети, които го импортват, трябва да бъдат прекомпилирани
+- Импортнат пакет, който не се използва, води до грешка по време на компилация
+
+.play code/01/hello_world_with_useless_import.go
+
+
+* Видимост
+
+Какво точно можем да използваме от импортнат пакет? Тук става забавно.
+
+_Даден_идентификатор_(било_то_на_променлива,_константа,_тип,_функция_или_
+_метод)_е_видим_извън_пакета_си,_тогава_и_само_тогава_когато_името_му_започва_с_главна_буква._
+
+Наричаме ги `exported` (на други места им викат `public`).
+
+Останалите са недостъпни (демек `private`)
+
+* Основни типове
+- bool
+- integer
+- float64
+- complex
+- string
+- array
+- struct
+- channel
+
+
+* ... но това не е всичко
+
+* Независещи от архитектурата числови типове
+
+Имаме свободата да решим точно колко байта да е нашия тип:
+
+- int8
+- int16
+- int32
+- int64
+
+\... и разбира се имаме `unsigned`:
+
+- uint8
+- uint16
+- uint32
+- ...
+
+* Зависещи от архитектурата
+
+- `uint` и `int`
+- може да са 32 или 64 бита
+- `uintptr` - нещо достатъчно голямо за да съдържа битовете на указател
+
+* Пояснение
+
+Типовете `int` и `int32` са различни дори в архитектури на които `int` е 32 бита. Същото е и за `uint`.
+
+
+* Пример
+
+    var name string = "Чочко Чочков"
+    var age uint8 = 25
+
+Горното можем (и трябва) да запишем като:
+
+    var (
+        name string = "Чочко Чочков"
+        age uint8 = 25
+    )
+
+Ако са с един и същи тип, можем и така:
+
+     var name, age string = "Чочко Чочков", "двадесет и пет"
+
+_WTF!_WTF!_WTF!_ Защо типа е на грешното място!?
+
+
+* type-inference
+
+Можем да правим и така:
+
+    name := "Чочко Чочков"
+    age := 25
+
+- Сам се усеща какъв тип да сложи на променливата
+- Това *НЕ* може да се ползва в глобалния скоуп
+
+.play code/01/wrong_type_inference.go
+
+* Стойности по подразбиране
+
+Не се грижим за това да си инициализираме стойностите. Всяка променлива в Go се инициализира по подразбиране:
+
+    var (
+        digit int         // 0
+        digit *int        // nil
+        number float64    // 0.0
+        isIt bool         // false
+        name string       // ""
+        root complex64    // (0+0i)
+        pipe chan <type>  // nil
+    )
+
+
+* Кастване
+
+Кастването работи, както очаквате:
+
+    number := 42                      // (int=42.0)
+    specificNumber := float64(number) // (float64=42.0)
+
+С тази разлика, че нямате имплицитен каст:
+
+    number * specificNumber // (mismatched types int and float64)
+
+
+* Unused variable
+
+Дефинирана стойност, която не се използва, води до грешка по време на компилация
+
+.play code/01/unused_var.go
+
+* Константи
+
+Аналогично с var:
+
+    const (
+        name string = "Чочко Чочков"
+        age uint8 = 25
+    )
+
+Могат да бъдат само
+
+- bool
+- int
+- float
+- complex
+- string
+
+
+* iota
+
+Нали помните `enum`?
+
+    const (
+        Monday = iota
+        Tuesday
+        Wednesday
+        Thursday
+        Friday
+        Partyday
+        Sunday
+    )
+
+.link http://en.wikipedia.org/wiki/Iota _Wikipedia:_ Iota is the ninth letter of the Greek alphabet.
+
+
+* Контролни структури
+
+
+* if
+
+    if age < 13 {
+        fmt.Print("Още не си тийнейджър")
+    } else if age >= 13 && age < 20 {
+        fmt.Print("В момента си тийнейджър")
+    } else {
+        fmt.Print("Минали са ти тийнейджърските години")
+    }
+
+- Няма `(` и `)` около условията
+- Отварящата `{` е на същия ред с условието.
+- `}`else`{`  трябва да са на един ред
+- Ползва се `else`if`, няма `elseif`
+
+* for
+
+Добрия стар `for` от C:
+
+    for i := 0; i < 20; i++ {
+        fmt.Println(i)
+    }
+
+И точно както в C, някои от аргументите не са задължителни.
+\... *някои* да се чете като *всички*.
+
+.play code/01/endless_for.go /^\s+for {/,/}/
+
+_Забележка:_ Отварящата `{` и тук е на същия ред с условието
+
+
+* while
+
+Няма. `for` покрива всичките му приложения.
+
+
+* foreach
+
+Няма. `for` покрива всичките му приложения.
+
+
+* switch
+
+    switch {
+    case age < 13:
+        fmt.Print("Още не си тийнейджър")
+    case age >= 13 && age < 20:
+        fmt.Print("В момента си тийнейджър")
+    default:
+        fmt.Print("Минали са ти тийнейджърските години")
+    }
+
+Няма нужда от излишния `break`
+
+Ако искаме да изпълним два поредни `case-а`, използваме `fallthrough`.
+
+
+* break и continue
+
+Все пак има `break`, който е приложим за `for` цикли.
+
+`continue` работи, точно както очаквате и където очаквате.
+
+
+* goto
+
+.image assets/exorcist.jpg
+
+Да, има и такова.
+
+Ако не знаете кога, не го ползвайте.
+
+Към момента допускаме, че още не знаете кога => не го ползвате.
+
+
+* Особености, с които се сблъскахте (Q&A)
+
+
+* ;
+
+*Q:* Няма точка и запетая след всеки израз?
+
+*A:* Всъщност има, но е имплицитна.
+
+Сега си спомнете за правилото с отварящата `{`.
+
+
+* Индентация
+
+*Q:* Интервали vs. Табове?
+*A:* Един таб.
+
+* За четене
+
+*Q:* Нещо за четене? Книги? Туториъли?
+*A:*
+
+.link https://golang.org/doc/code.html How to Write Go Code
+.link https://tour.golang.org/welcome/1 A Tour of Go
+.link https://golang.org/doc/effective_go.html Effective Go
+.link https://play.golang.org/ Изпънение на Go код с браузър
+.link https://blog.golang.org/ Golang Blog
+
+* В следващия епизод:
+
+- Функции
+- Указатели
