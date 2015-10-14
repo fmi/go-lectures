@@ -434,9 +434,9 @@ _WTF!_WTF!_WTF!_ Защо типа е на грешното място!?
 Могат да бъдат само
 
 - bool
-- int
-- float
-- complex
+- int, int8, int16, int32, int64
+- float32, float64
+- complex64, complex128
 - string
 
 
