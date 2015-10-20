@@ -6,4 +6,8 @@
     title: 01. Въведение в Go
     date: 2015-10-13
     url: http://lectures.fmi.golang.bg/01-intro.slide
+2:
+    title: 02. Функции и указатели
+    date: 2015-10-20
+    url: http://lectures.fmi.golang.bg/02-funcs_and_pointers.slide
 

@@ -8,7 +8,6 @@ func main() {
 
 func sumAndCount(args ...int) (result int, count int) {
 	count = len(args)
-	result = 0
 	for _, v := range args {
 		result += v
 	}
