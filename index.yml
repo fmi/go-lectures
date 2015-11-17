@@ -15,11 +15,15 @@
     date: 2015-10-27
     url: http://lectures.fmi.golang.bg/03-data_structures.slide
 4:
-    title: 04. Concurrency 101
+    title: 04. Конкурентност 101
     date: 2015-11-03
     url: http://lectures.fmi.golang.bg/04-concurrency101.slide
 5:
     title: 05. Типове и интерфейси
     date: 2015-11-10
     url: http://lectures.fmi.golang.bg/05-types_and_interfaces.slide
+6:
+    title: 06. Конкурентност 102
+    date: 2015-11-17
+    url: http://lectures.fmi.golang.bg/06-concurrency102.slide
 

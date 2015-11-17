@@ -1,0 +1,241 @@
+Конкурентност 102
+17.11.2015
+
+fmi@golang.bg
+http://fmi.golang.bg/
+@fmi_golang
+
+* Но преди това...
+
+- Изберете си проект. Краен срок: Бъдни вечер
+- Първи тест на 01.12.2015
+- Домашно
+
+* Въпрос за мъфин #1
+
+Как създаваме нов тип?
+
+- С ключовата дума `type`
+- Заедно с вече съществуващ тип или структура
+
+    type AwesomeInt int
+
+* Въпрос за мъфин #2
+
+Как ще укажем, че типа `Car` имплементира интерфейса `Vehicle`?
+
+- По никакъв начин не го казваме изрично
+- Стига `Car` да има правилните методи, то той имплементира интерфейса
+
+* Въпрос за мъфин #3
+
+Как проверяваме дали някой `Vehicle` е `Car`?
+
+- type assertion
+- car, ok := veh.(Car)
+
+* Въпрос за мъфин #4
+
+Как може да преизползваме вече имплементирани методи и атрибути на някой тип в нов?
+
+- Композиция
+
+    type Student struct {
+        Person
+    }
+
+* Конкурентност 102
+
+* Ще си говорим за
+
+- sync
+- select
+- patterns
+
+* Да си спомним скуката
+
+.play code/concurrency102/go-less-boring-sleep.go /^func main/,/^}/
+
+- Грозен `time.Sleep`
+- Ако искаме да гледаме скуката точно определен брой пъти?
+
+* sync
+
+Пакет, който ни дава синхронизационни примитиви от ниско ниво:
+
+- `Cond`
+- `Mutex`
+- `Once`
+- `RWMutex`
+- `WaitGroup`
+
+
+* WaitGroup
+
+Изчаква колекция от горутини да приключат и чак тогава продължава с изпълнението.
+Така не правим простотии със `time.Sleep`, както одеве.
+
+    package sync
+
+    type WaitGroup struct {}
+
+    func (*WaitGroup) Add()
+    func (*WaitGroup) Done()
+    func (*WaitGroup) Wait()
+
+* Пример
+
+.play code/concurrency102/boring-with-sync.go /^func main/,/^}/
+
+Стига вече с тая скука!
+
+* По - интересен пример
+
+.play code/concurrency102/waitgroup.go /^func main/,/^}/
+
+
+* Mutex
+
+    package sync
+
+    type Mutex struct {}
+
+    func (*Mutex) Lock()
+    func (*Mutex) Unlock()
+
+- Дава достъп до даден ресурс само на една горутина по едно и също време
+- Ако втора се опита да го достъпи, тя чака, докато ресурсът не бъде освободен
+- Ако много горутини чакат за един ресурс, достъп се дава на една от тях на случаен принцип
+- Има смисъл да се ползва като `private` атрибут на наш тип
+- `Unlock()` е добра идея да бъде в `defer`
+- Имплементира интерфейса `sync.Locker`
+
+* В код
+
+.play code/concurrency102/mutex.go /^func main/,/^}/
+
+* На каналски
+
+.play code/concurrency102/mutex_chan.go /^func main/,/^}/
+
+* RWMutex
+
+    package sync
+
+    type RWMutex struct {}
+
+    func (*RWMutex) Lock()
+    func (*RWMutex) Unlock()
+    func (*RWMutex) RLock()
+    func (*RWMutex) RUnlock()
+    func (*RWMutex) RLocker() sync.Locker
+
+- Също имплементира `sync.Locker`
+- Може да бъде "държана" от произволен брой "четци" или точно един "писар"
+- `RLock` блоква само докато някой използва `Lock`
+- Ако извикате някой unlock на незаключен mutex - run-time error
+- `RLocker()` връща `Locker`, който ще използва `RLock` и `RUnlock` на оригинала
+
+* Once
+
+Обект от този тип ще изпълни точно една функция.
+
+.play code/concurrency102/once.go /^func main/,/^}/
+
+* Cond
+
+	type Cond struct {
+		// L is held while observing or changing the condition
+		L Locker
+		// contains filtered or unexported fields
+	}
+
+- Нарича се `condition-variable` или `monitor`
+- Синхронизира горутини на принципа на съобщаването за настъпване на дадено събитие
+- Напълно в реда на нещата е да бъде част от наша структура
+- *Никога* не трябва да го копирате след като решите да го ползвате!
+
+- Demo code/concurrency102/cond.go
+
+* select
+
+   select {
+   case v1 := <-c1:
+       fmt.Printf("received %v from c1\n", v1)
+   case v2 := <-c2:
+       fmt.Printf("received %v from c2\n", v2)
+   default:
+       fmt.Printf("no one was ready to communicate\n")
+   }
+
+
+Накратко: `switch` за канали.
+Надълго: Изчаква първия канал, по който е изпратена стойност
+
+- Ако по никой от каналите не е изпратено нищо, изпълнява `default`
+- Ако няма `default` блокира и изчаква
+- Важна част от различни concurrency patterns в Go
+
+* Concurrency patterns
+
+* Timeout
+
+   select {
+   case result := <-google:
+       fmt.Printf("received %v from google\n", result)
+   case result := <-bing:
+       fmt.Printf("received %v from bing\n", result)
+   case <- time.After(1 * time.Second):
+       fmt.Printf("timed out\n")
+   }
+
+
+* Игра на развален телефон
+
+.image assets/gophereartrumpet.jpg
+
+- или колко точно са бързи и евтини горутините?
+
+* Игра на развален телефон
+
+.play code/concurrency102/daisy-chain.go /START/,/END/
+
+
+* Generators
+
+.play code/concurrency102/fib.go
+
+
+* Fan In
+
+.code code/concurrency102/dummy_fanin.go /TALK START/,/TALK END/
+.play code/concurrency102/dummy_fanin.go /MAIN START/,/MAIN END/
+
+- Какъв е проблемът тук?
+
+* Fan In
+
+.image assets/fanin.jpg
+
+* Fan In <- Concurrency
+
+.code code/concurrency102/select_fanin.go /FANIN START/,/FANIN END/
+.play code/concurrency102/select_fanin.go /MAIN START/,/MAIN END/
+
+* Finish channel
+
+.code code/concurrency102/select_finish_fanin.go /FANIN START/,/FANIN END/
+
+* Finish channel
+
+.play code/concurrency102/select_finish_fanin.go /MAIN START/,/MAIN END/
+
+* Words of wisdom
+
+- Всичко това е забавно, но не ставайте човека с чука
+- Го рутините и каналите са инструменти за построяване на програми
+- Но понякога ви трябва просто брояч
+- Инструменти за малките проблеми могат да бъдат намерени в "sync" и "sync/atomic"
+- Често всички тези неща ще работят заедно за да се справят с по - големите проблеми
+- Използвайте правилния инструмент за задачата
+
