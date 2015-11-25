@@ -26,4 +26,8 @@
     title: 06. Конкурентност 102
     date: 2015-11-17
     url: http://lectures.fmi.golang.bg/06-concurrency102.slide
+7:
+    title: 07. Грешки и тестване
+    date: 2015-11-24
+    url: http://lectures.fmi.golang.bg/07-errors_and_testing.slide
 
