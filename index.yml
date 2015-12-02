@@ -30,4 +30,8 @@
     title: 07. Грешки и тестване
     date: 2015-11-24
     url: http://lectures.fmi.golang.bg/07-errors_and_testing.slide
+8:
+    title: 08. Регулярни изрази
+    date: 2015-12-01
+    url: http://lectures.fmi.golang.bg/08-regexp.slide
 
