@@ -34,4 +34,8 @@
     title: 08. Регулярни изрази
     date: 2015-12-01
     url: http://lectures.fmi.golang.bg/08-regexp.slide
+9:
+    title: 09. Cgo и Go изцяло на Go
+    date: 2015-12-15
+    url: http://lectures.fmi.golang.bg/09-cgo-runtime.slide
 
