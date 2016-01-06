@@ -42,4 +42,8 @@
     title: 10. Tools, Tips and Good Practices
     date: 2015-12-22
     url: http://lectures.fmi.golang.bg/10-tools.slide
+11:
+    title: 11. Интересни имплементационни детайли в Go
+    date: 2016-01-05
+    url: http://lectures.fmi.golang.bg/11-goruntime.slide
 
