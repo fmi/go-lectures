@@ -46,4 +46,7 @@
     title: 11. Интересни имплементационни детайли в Go
     date: 2016-01-05
     url: http://lectures.fmi.golang.bg/11-goruntime.slide
-
+12:
+    title: 12. Web програмиране
+    date: 2016-01-12
+    url: http://lectures.fmi.golang.bg/12-web-programming.slide
