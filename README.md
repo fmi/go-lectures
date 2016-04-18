@@ -8,7 +8,7 @@
 Инсталация
 -----
 
-	go get -u golang.org/x/tools/present
+	go get -u golang.org/x/tools/cmd/present
 
 Употреба
 ------
