@@ -2,11 +2,6 @@ package main
 
 import "fmt"
 
-func main() {
-	fmt.Println("Резултатът от sumAndCount(2, 3, 4, 5) е")
-	fmt.Println(sumAndCount(2, 3, 4, 5))
-}
-
 func sumAndCount(args ...int) (int, int) {
 	result := 0
 	for _, v := range args {
@@ -14,4 +9,9 @@ func sumAndCount(args ...int) (int, int) {
 	}
 
 	return result, len(args)
+}
+
+func main() {
+	fmt.Printf("Резултатът от sumAndCount е: ")
+	fmt.Println(sumAndCount(2, 3, 4, 5))
 }

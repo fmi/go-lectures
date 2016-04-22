@@ -1,57 +1,8 @@
 Типове и интерфейси
-10.11.2015
+20.04.2016
 
 fmi@golang.bg
 http://fmi.golang.bg/
-@fmi_golang
-
-* Но преди това...
-
-
-* Въпрос за мъфин #1
-
-Как постигаме паралелизъм в Go?
-
-- С go рутини създаваме конкурентна програма
-- Ако сме били достатъчно добри тя ще се паралелизира лесно без да се налага да правим нищо.
-
-
-* Въпрос за мъфин #2
-
-Какво е отношението между go рутини и нишки?
-
-- Go рутините се пускат и спират от изпълнение върху нишките. Това го прави runtime-a.
-- Прилича на това как процесите се пускат и спират върху процесора от OS-a
-- Не е същото
-
-
-* Въпрос за мъфин #3
-
-Каква е разликата между паралелизъм и конкурентност?
-
-- Конкурентност е да се да се занимаваш с много неща едновременно. Става въпрос за структура на програмата.
-- Паралелизъм е да правиш много неща едновременно. Става въпрос за execution.
-
-
-* Въпрос за мъфин #4
-
-Как разбираме, че един канал е затворен?
-
-- При канал за четене, когато `ok` е `false`:
-    if val, ok := <-ch; !ok {
-        // Channel is closed
-    }
-
-- При канал за четене, когато `for...range` цикъл по канала приключи:
-    for val := range ch {
-        // Do something
-    }
-    // Channel is closed
-
-- При канал за писане няма как.
-
-* Типове и интерфейси
-
 
 
 * Собствени типове
@@ -146,6 +97,7 @@ http://fmi.golang.bg/
 * struct
 
 - Същите неща могат да се правят и върху композитни типове
+- Полета и методи с малка буква са private
 - Нека си дефинираме типове за триъгълник и правоъгълник
 
 .code code/types_and_interfaces/shapes.go /start types/,/end types/
@@ -265,33 +217,22 @@ _Конструираме_един_тип,_комбинирайки_няколк
 
 * Type Assertions
 
-    var value interface{}
-    value = 20
-    value = "asd"
-    str, ok := value.(string)
-    if !ok {
-            fmt.Println("Oops")
-    }
+.play code/types_and_interfaces/type_assertion.go /START OMIT/,/END OMIT/
 
-След последния ред `str` ще имаме стойността на `value`, ако тя наистина е била от тип `string`.
+В `str` ще имаме стойността на `value`, ако тя наистина е била от тип `string`.
 
 
 * Interface Conversions
 
-    var value interface{}
-    switch str := value.(type) {
-    case string:
-        return str
-    case Stringer:
-        return str.String()
-    }
+.play code/types_and_interfaces/interface_conversions.go /^type mystruct/,
 
-Така може да се държим по различен начин въз основа на типа на дадена променлива.
+
+Така може да правим различни неща въз основа на типа на променлива.
 
 
 * JSON
 
-.play code/types_and_interfaces/plain_json.go /start/,/end/
+.play code/types_and_interfaces/plain_json.go /^type Rectangle/,
 
 
 * JSON
@@ -308,5 +249,3 @@ _Конструираме_един_тип,_комбинирайки_няколк
 
 
 .play code/types_and_interfaces/custom_json.go /start/,/end/
-
-

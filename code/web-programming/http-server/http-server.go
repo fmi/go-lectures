@@ -9,11 +9,9 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/world", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
-	})
-
-	go http.ListenAndServe(":8282", nil)
+	go http.ListenAndServe(":8282", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Hello, %s", html.EscapeString(r.URL.Path))
+	}))
 
 	res, err := http.Get("http://localhost:8282/world")
 	if err != nil {

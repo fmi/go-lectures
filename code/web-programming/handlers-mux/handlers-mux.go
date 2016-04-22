@@ -12,7 +12,6 @@ import (
 func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/doc/", http.FileServer(http.Dir("/usr/share/")))
-	mux.Handle("/gcdocs/", http.RedirectHandler("/doc/gc", http.StatusMovedPermanently))
 	mux.Handle("/google/", http.RedirectHandler("https://www.google.com", http.StatusTemporaryRedirect))
 	mux.Handle("/proxy/", http.StripPrefix("/proxy/", httputil.NewSingleHostReverseProxy(
 		&url.URL{Scheme: "https", Host: "mirrors.kernel.org", Path: "/"},

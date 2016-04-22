@@ -6,19 +6,6 @@ import (
 	"time"
 )
 
-// MAIN START OMIT
-func main() {
-	doycho := talk("Doycho") // HL
-	ned := talk("Ned")       // HL
-	for i := 0; i < 5; i++ {
-		fmt.Println(<-doycho)
-		fmt.Println(<-ned)
-	}
-}
-
-// MAIN END OMIT
-
-// TALK START OMIT
 func talk(msg string) <-chan string { // HL
 	c := make(chan string)
 	go func() {
@@ -30,4 +17,11 @@ func talk(msg string) <-chan string { // HL
 	return c
 }
 
-// TALK END OMIT
+func main() {
+	doycho := talk("Doycho") // HL
+	ned := talk("Ned")       // HL
+	for i := 0; i < 5; i++ {
+		fmt.Println(<-doycho)
+		fmt.Println(<-ned)
+	}
+}

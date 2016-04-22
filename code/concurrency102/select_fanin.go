@@ -38,7 +38,6 @@ func fanIn(input1, input2 <-chan string) <-chan string { // HL
 }
 
 // FANIN END OMIT
-
 // MAIN START OMIT
 func main() {
 	c := fanIn(talk("Ned"), talk("Doycho")) // HL

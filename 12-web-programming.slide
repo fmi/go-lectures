@@ -1,60 +1,8 @@
 Web програмиране
-12.01.2016
+21.04.2016
 
 fmi@golang.bg
 http://fmi.golang.bg/
-@fmi_golang
-
-* Въпроси за мъфини
-
-* Въпрос за мъфин #1
-
-Кога ще е първата незадължителна защита на проектите?
-
-- 19.01.2016 - другия вторник
-
-* Въпрос за мъфин #2
-
-Какво означава inlining (a.k.a inline expansion)?
-
-- Оптимизация на компилатора
-- Замества се извикването на функция с нейното тяло
-- Елиминира overhead-а от извикването на функция
-
-* Въпрос за мъфин #3
-
-Как се увеличава рамера на стека в Go в момента?
-
-- Алокира се нов, (2 пъти) по-голям стек от текущия
-- Паметта от стария стек се копира в новия
-- Оправят се pointer-ите
-- Старият стек вече може да се изтрие
-
-* Въпрос за мъфин #4
-
-Какво се случва, ако решим да пишем в затворен канал?
-
-- Изпадаме в паника :)
-
-* Въпрос за мъфин #5
-
-Какво ще върне `recover()`, ако го извикаме без да сме в състояние на паника?
-
-- `nil`
-
-* Въпрос за мъфин #6
-
-Какво ще изведе този код:
-
-	x := []string{"a","b","c"}
-	
-	for v := range x {
-	  fmt.Println(v)
-	}
-
-- 0
-- 1
-- 2
 
 * HTTP
 
@@ -91,8 +39,8 @@ http://fmi.golang.bg/
 - Крие от вас различните версии
 - Може да си се занимавате с тях ако искате
 - Лесно и почти прозрачно поддържа и HTTPS заявки и сървъри!
-- Вградена поддръжка за HTTP 2.0 ще има съвсем скоро с версия 1.6!
-- За момента е тук: [[https://godoc.org/golang.org/x/net/http2]]
+- От версия 1.6 вече си имаме вградена поддръжка за HTTP 2.0!
+- И преди това имаше, просто беше тук [[https://golang.org/x/net/http2]]
 
 * Защо!?
 
@@ -103,7 +51,7 @@ http://fmi.golang.bg/
 
 * Клиентска част
 
-.play code/web-programming/http-client.go /^import/,/^}/
+.play code/web-programming/http-client/http-client.go /^import/,/^}/
 
 - Не е интересно, всички вероятно сте го правили
 - С помощта на `http.Request` и `http.Client` може да се правят и по-сложни заявки
@@ -156,7 +104,7 @@ http://fmi.golang.bg/
 
 * Интересна част
 
-.play code/web-programming/http-server.go /func main/,/^}/
+.play code/web-programming/http-server/http-server.go /func main/,/^}/
 
 * Получаване на клиентски заявки
 
@@ -190,6 +138,13 @@ http://fmi.golang.bg/
 - В такова нещо пишете отговора на HTTP заявка
 - Забележете, че всяка негова имплементация ще имплементира и `io.Writer` интерфейса
 
+Това ни позволява да си използваме неща като:
+
+  fmt.Fprintf(rw, "Нещо си")
+
+за да отговаряме на HTTP заявки...
+
+
 * http.Handler
 
 	type Handler interface {
@@ -211,7 +166,7 @@ http://fmi.golang.bg/
 - По някакво правило разпределя заявки на краен брой други хендлъри
 - `http.HandleFunc` добавя ново правило в `http.DefaultServeMux`
 - `http.ServeMux` е проста имплементация, която само match-ва пътя на заявката
-- .. ако нищо не съвпадне се извиква `http.NotFoundHandler`
+- ... ако нищо не съвпадне се извиква `http.NotFoundHandler`
 
 * Стандартни Handler-и
 
@@ -225,7 +180,7 @@ http://fmi.golang.bg/
 
 * Пример
 
-.play code/web-programming/handlers-mux.go /func main/,/^}/
+.play code/web-programming/handlers-mux/handlers-mux.go /func main/,/^}/
 
 
 * ResponseWriter допълнения
@@ -344,22 +299,6 @@ http://fmi.golang.bg/
 	<a onx='f("{{.}}")'>             O\x27Reilly: How are \x3ci\x3eyou...?
 	<a onx='f({{.}})'>               "O\x27Reilly: How are \x3ci\x3eyou...?"
 	<a onx='pattern = /{{.}}/;'>     O\x27Reilly: How are \x3ci\x3eyou...\x3f
-
-
-* Gorilla
-
-Няколко библиотеки, които ще улеснят живота ви по темата
-
-- gorilla/context
-- gorilla/mux
-- gorilla/reverse
-- gorilla/rpc
-- gorilla/schema
-- gorilla/securecookie
-- gorilla/sessions
-- gorilla/websocket
-
-.link http://www.gorillatoolkit.org/
 
 
 * Допълнително четене

@@ -1,48 +1,8 @@
 Конкурентност 102
-17.11.2015
+20.04.2016
 
 fmi@golang.bg
 http://fmi.golang.bg/
-@fmi_golang
-
-* Но преди това...
-
-- Изберете си проект. Краен срок: Бъдни вечер
-- Първи тест на 01.12.2015
-- Домашно
-
-* Въпрос за мъфин #1
-
-Как създаваме нов тип?
-
-- С ключовата дума `type`
-- Заедно с вече съществуващ тип или структура
-
-    type AwesomeInt int
-
-* Въпрос за мъфин #2
-
-Как ще укажем, че типа `Car` имплементира интерфейса `Vehicle`?
-
-- По никакъв начин не го казваме изрично
-- Стига `Car` да има правилните методи, то той имплементира интерфейса
-
-* Въпрос за мъфин #3
-
-Как проверяваме дали някой `Vehicle` е `Car`?
-
-- type assertion
-- car, ok := veh.(Car)
-
-* Въпрос за мъфин #4
-
-Как може да преизползваме вече имплементирани методи и атрибути на някой тип в нов?
-
-- Композиция
-
-    type Student struct {
-        Person
-    }
 
 * Конкурентност 102
 
@@ -61,25 +21,30 @@ http://fmi.golang.bg/
 
 * sync
 
-Пакет, който ни дава синхронизационни примитиви от ниско ниво:
+[[https://golang.org/pkg/sync/][sync]] е пакет, който ни дава синхронизационни примитиви от сравнително ниско ниво:
 
 - `Cond`
 - `Mutex`
 - `Once`
+- `Pool`
 - `RWMutex`
 - `WaitGroup`
 
+и един полезен интерфейс:
+
+    type Locker interface {
+        Lock()
+        Unlock()
+    }
 
 * WaitGroup
 
 Изчаква колекция от горутини да приключат и чак тогава продължава с изпълнението.
-Така не правим простотии със `time.Sleep`, както одеве.
-
-    package sync
+Така не правим простотии със `time.Sleep`, както преди.
 
     type WaitGroup struct {}
 
-    func (*WaitGroup) Add()
+    func (*WaitGroup) Add(delta int)
     func (*WaitGroup) Done()
     func (*WaitGroup) Wait()
 
@@ -95,8 +60,6 @@ http://fmi.golang.bg/
 
 
 * Mutex
-
-    package sync
 
     type Mutex struct {}
 
@@ -120,10 +83,11 @@ http://fmi.golang.bg/
 
 * RWMutex
 
-    package sync
+- Дава thread-safe достъп до споделен ресурс (променлива) от множество горутини
+- Дава достъп до ресурса в даден момент само на *един* writer или на произволен брой readers
+- По-ефективен от `Mutex` при ситуации, в които част от горутините само четат
 
     type RWMutex struct {}
-
     func (*RWMutex) Lock()
     func (*RWMutex) Unlock()
     func (*RWMutex) RLock()
@@ -131,7 +95,6 @@ http://fmi.golang.bg/
     func (*RWMutex) RLocker() sync.Locker
 
 - Също имплементира `sync.Locker`
-- Може да бъде "държана" от произволен брой "четци" или точно един "писар"
 - `RLock` блоква само докато някой използва `Lock`
 - Ако извикате някой unlock на незаключен mutex - run-time error
 - `RLocker()` връща `Locker`, който ще използва `RLock` и `RUnlock` на оригинала
@@ -155,7 +118,7 @@ http://fmi.golang.bg/
 - Напълно в реда на нещата е да бъде част от наша структура
 - *Никога* не трябва да го копирате след като решите да го ползвате!
 
-- Demo code/concurrency102/cond.go
+- Demo `./code/concurrency102/cond.go`
 
 * select
 
@@ -174,20 +137,22 @@ http://fmi.golang.bg/
 
 - Ако по никой от каналите не е изпратено нищо, изпълнява `default`
 - Ако няма `default` блокира и изчаква
+- Няма определен ред: ако няколко не-default case-а са възможни, избира се случаен
 - Важна част от различни concurrency patterns в Go
+
+* Въпрос
+
+Какво би направил следния код?
+
+.play code/concurrency102/indeterminate-select.go /^func main/,
+
+Who knows :)
 
 * Concurrency patterns
 
 * Timeout
 
-   select {
-   case result := <-google:
-       fmt.Printf("received %v from google\n", result)
-   case result := <-bing:
-       fmt.Printf("received %v from bing\n", result)
-   case <- time.After(1 * time.Second):
-       fmt.Printf("timed out\n")
-   }
+.play code/concurrency102/timeout.go /^func fetch/,
 
 
 * Игра на развален телефон
@@ -208,8 +173,7 @@ http://fmi.golang.bg/
 
 * Fan In
 
-.code code/concurrency102/dummy_fanin.go /TALK START/,/TALK END/
-.play code/concurrency102/dummy_fanin.go /MAIN START/,/MAIN END/
+.play code/concurrency102/dummy_fanin.go /^func talk/,
 
 - Какъв е проблемът тук?
 
@@ -219,8 +183,7 @@ http://fmi.golang.bg/
 
 * Fan In <- Concurrency
 
-.code code/concurrency102/select_fanin.go /FANIN START/,/FANIN END/
-.play code/concurrency102/select_fanin.go /MAIN START/,/MAIN END/
+.play code/concurrency102/select_fanin.go /func fanIn/,
 
 * Finish channel
 
@@ -238,4 +201,3 @@ http://fmi.golang.bg/
 - Инструменти за малките проблеми могат да бъдат намерени в "sync" и "sync/atomic"
 - Често всички тези неща ще работят заедно за да се справят с по - големите проблеми
 - Използвайте правилния инструмент за задачата
-

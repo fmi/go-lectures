@@ -1,62 +1,17 @@
 Concurrency 101
-03.11.2015
+20.04.2016
 
 fmi@golang.bg
 http://fmi.golang.bg/
-@fmi_golang
 
-* Но преди това...
+* За какво ще си говорим?
 
-* Въпрос за мъфин #1
-
-Колко памет се копира, когато подадем масив на функция?
-
-- Потенциално много. Копира се целия масив.
-
-* Въпрос за мъфин #2
-
-Колко полета има една slice структура? Кои са те?
-
-- Три:
-- pointer
-- len
-- cap
-
-* Въпрос за мъфин #3
-
-Възможно ли е map да има стойности от различен тип?
-
-- Не
-- Един map е от вида `map[KeyType]ValueType`
-
-* Въпрос за мъфин #4
-
-Колко начина има да се създаде нова структура от тип Т? Кои са те?
-
-- Два:
-- x := new(T)
-- x := &T{}
-
-* Въпрос за мъфин #5
-
-Колко памет заема една структура?
-
-- Сбора на памета, нужна на нейните полета. Плюс падинг до края на машинната дума.
-- Без никакви допълнителни meta данни.
-
-* Какво ще говорим днес?
-
-- Конкурентност с/у Паралелизъм
-- Кратка история на многопроцесорното програмиране
-- go рутини
-- Споделяне чрез комуникация
+- concurrency vs. parallelism
+- goroutines
+- sharing by communicating
 - channels
 
-* Домашно (старо)
-
-* Домашно (ново)
-
-* Що е то конкурентност?
+* Що е то concurrency?
 
 * Магически паралелизъм?
 
@@ -66,17 +21,21 @@ http://fmi.golang.bg/
 
 * Конкурентност
 
-- Набор от независими процеси
+- Конкурентност е да се да се *занимаваш* с много неща "едновременно"
+- Имаме набор от независими процеси/задачи
+- Могат да започват, работят и приключват в припокриващи се периоди
+- Процесите в една операционна система, работеща на 1 процесорно ядро, са конкурентни
+- В JavaScript има concurrency, без да е необходим паралелизъм
 
 * Паралелизъм
 
-- Изпълнение на различни неща едновременно
+- *Изпълнение* на различни неща едновременно
 - Свързани по между си или не
 
 * Конкурентност с/у Паралелизъм
 
-- Когато говорим за конкурентност говорим за структура
-- Когато говорим за паралелизъм става въпрос за изпълнение
+- Когато говорим за конкурентност става въпрос за структурата на програмата
+- Когато говорим за паралелизъм става въпрос за изпълнението ѝ
 
 * Обяснение с малко повече gophers
 
@@ -84,6 +43,7 @@ http://fmi.golang.bg/
 
 .link http://blog.golang.org/concurrency-is-not-parallelism
 
+.link http://concur.rspace.googlecode.com/hg/talk/concur.html
 
 * Moore's law
 
@@ -93,7 +53,7 @@ http://fmi.golang.bg/
 * IO-bound vs. CPU-bound
 
 - CPU-bound са програми, които главно зависят от време, прекарано в процесора
-- IO-bound са програми, които главно зависят от време, прекарано в чакане (мрежа, памет, диск)
+- IO-bound са програми, които главно зависят от време, прекарано в чакане на мрежата, паметта или диска
 
 
 * Processes vs. Threads (Green & Native)
@@ -112,17 +72,7 @@ http://fmi.golang.bg/
 
 * В C ползват вилици
 
-    #include <stdio.h>
-
-    int main()
-    {
-        printf("before\n");
-        if (fork())
-            printf("parent\n");
-        else
-            printf("child\n");
-        printf("both\n");
-    }
+.code code/concurrency101/c_fork.c
 
 - `fork` създава ново копие на програмата, която изпълняваме
 - Всички ресурси и променливи запазват стойността си в процеса-дете
@@ -132,20 +82,7 @@ http://fmi.golang.bg/
 
 * Синхронизация на вилици
 
-    #include <stdio.h>
-    #include <unistd.h>
-
-    int main()
-    {
-        pid_t pid = fork();
-        if (pid == 0) {
-            execl("/bin/sleep", "/bin/sleep", "2", (char *) 0);
-        } else {
-            waitpid(pid, NULL, 0);
-        }
-        printf("done!\n");
-        return 0;
-    }
+.code code/concurrency101/c_fork_sync.c
 
 - `execl` спира изпълнението на текущия процес и зарежда друг
 - `waitpid` позволява на родителя да чака свършването на конкретно дете
@@ -186,15 +123,15 @@ http://fmi.golang.bg/
 
 * Нишки в C
 
-.code code/04/c_threads.c /ticker/,/return 0/
+.code code/concurrency101/c_threads.c /ticker/,
 
 * Нишки в Python
 
-.code code/04/python_threads.py /ticker/,/thread.start/
+.code code/concurrency101/python_threads.py /ticker/,/thread.start/
 
 или
 
-.code code/04/python_threads.py /class/,/thread.join/
+.code code/concurrency101/python_threads.py /class/,/thread.join/
 
 * Goroutines
 
@@ -203,7 +140,7 @@ http://fmi.golang.bg/
 
 За да се съсредоточим върху това, което се опитваме да кажем ще дадем скучен пример.
 
-.play code/04/boring.go /func boring/,/^}/
+.play code/concurrency101/boring.go /^func main/,
 
 За конкурентноста тайминга е важен. Нека е малко по - непредвидим.
 
@@ -212,7 +149,7 @@ http://fmi.golang.bg/
 
 Ще сложим случайно време за сън.
 
-.play code/04/less-boring.go /func main/,/}\n}/
+.play code/concurrency101/less-boring.go /^func main/,
 
 Скучната ни програма ще продължи да работи така до безкрайност. Като много скучна лекция, от която ви е неудобно да си тръгнете.
 
@@ -225,14 +162,14 @@ http://fmi.golang.bg/
 
 Пускаме goroutine.
 
-.play code/04/go-less-boring.go /^package/,/^}/
+.play code/concurrency101/go-less-boring.go /^func main/,
 
 Когато main приключи програмата спира.
 
 
 * Да я игнорираме малко по - малко
 
-.play code/04/go-less-boring-sleep.go /^package/,/^}/
+.play code/concurrency101/go-less-boring-sleep.go /^func main/,
 
 Изпълнявахме main и скучната функция едновременно.
 
@@ -277,30 +214,35 @@ http://fmi.golang.bg/
 * Критични секции
 
 - Части от кода, които могат да бъдат изпълнени само от една нишка/процес в даден момент, се наричат критични секции
-- Те са критична част от многозадачното програмиране
-- Има много похвати за реализирането на критични секции.
-- STM, Semaphors & Co., Message passing, Actors
+- Те са основна част от многозадачното програмиране
+- Има много похвати за реализирането на критични секции
+- STM, Semaphores & Co., Message passing, Actors
 
-В Go имаме Semaphors и Message passing
+В Go имаме Semaphores и Message passing
 
 * Communicate by sharing vs. Share by communicating
 
+- Може експлицитно да използваме "ключалки", за да ограничаваме едновременния достъп до споделена памет
+- В Go също може да го правим, подобно на повечето mainstream езици
+- Но в много ситуации в Go би било по-добре да споделяме памет чрез комуникация
+- Може да предаваме (референции към) данни между различни горутини с помощтта на канали
 
 * Channels
 
-- Вграден тип, който се използва за комуникация между две горутини.
+- Вграден тип, който се използва за комуникация между различни горутини
 - Може да се използва и за синхронизация
 - За тях има специален синтаксис
 
 
 * Употреба на канали
 
-- Инстанцират се с `make`
-- Подава се типа, който ще се пренася от канала
-    
-    ch := make(chan uint64)
+- Инстанцират се с `make`, като се подава типа, който ще се пренася
+- Този е за пренасяне на цели числа:
+  intChannel := make(chan int)
 
 - Могат да бъдат буферирани и небуферирани
+- По подразбиране са небуферирани
+- Ето буфериран канал за пренасяне на string slices:
 
     ch := make(chan []string, 100)
 
@@ -309,38 +251,32 @@ http://fmi.golang.bg/
     ch <- 64
     read := <-ch
 
-- Когато изпращаме или получаваме, това може да блокира
+- Изпращането и получаването може да блокират докато някой "отсреща" не извърши "противоположната" операция
 
 
 * IO в канал
 
 Операциите по изпращане и получаване се изпълняват с оператора `<-`
 
-- `chan`<-`стойност` изпраща по канала
-- `променлива` = `<-chan` получава от канала
+- `chan`<-`someValue` изпраща по канала
+- `someVar,`ok` = `<-chan` получава от канала
 
-Канал може да бъде затворен
+Simple demo:
+
+.play code/concurrency101/channel-simple-demo.go /^func main/,
+
+* Затваряне
+
+Канал може да бъде затворен:
 
     close(ch)
 
 - Повече не може да бъде отворен
-- Четенето в него никога не блокира
-- ... като връща нулевата стойност за типа
 - Писането в него води до паника
+- Четенето в него никога не блокира
+- Може да прочетете всички вече буферирани стойности, ако каналът е бил буфериран
+- След това четенето връща нулевата стойност за предавания тип и false като втори резултат
 
-* Създаване на канали
-
-- Небуфериран канал за пренасяне на цели числа:
-  intChannel := make(chan int)
-
-- Буфериран канал за пренасяне на стрингове:
-  stringBufferedChannel := make(chan string, 5)
-
-- Канал само за четене:
-  readOnlyChannel := make(<-chan int)
-
-- Канал само за писане:
-  writeOnlyChannel := make(chan<- int)
 
 * Каналите са първокласни обекти в Go
 
@@ -348,13 +284,41 @@ http://fmi.golang.bg/
   c := make(chan chan int)
 
 - Каналите могат да се подават като параметри на функции
-  func doSomething(input <-chan string) {}
+  func doSomething(input chan string) {
+    // do something
+  }
 
 - Функциите могат да връщат канали като резултат.
   func doSomethingElse() chan string {
     result := make(chan string)
     return result
   }
+
+* range
+
+Помните ли как ви казахме, че `range` е нещо супер яко?
+
+- Може да чете и от канали
+- Блокира, докато не получи следващата стойност
+- Излизаме от `for`, когато каналът бъде затворен
+
+  for val := range ch {
+      fmt.Printf("Recieved: %#v\n", val)
+  }
+
+
+* Ограничени канали
+
+- Каналите могат да бъдат само за четене (`<-chan`) или само за писане (`chan<-`)
+- Това е по-полезно, отколкото звучи:
+
+.play code/concurrency101/generator.go /func randomFeed/,
+
+
+* Deadlock
+
+.play code/concurrency101/deadlock.go /func main/,
+
 
 * nil channel
 
@@ -380,17 +344,9 @@ http://fmi.golang.bg/
         fmt.Println(<-c) // deadlock
     }
 
-* Пример
+* Пример за синхронизация
 
-    c := make(chan int)
-
-    go func() {
-        list.Sort()
-        c <- 1
-    }()
-
-    doSomethingForAWhile()
-    <-c
+.play code/concurrency101/synchronization.go /func main/,
 
 - Не използвайте int или bool ако просто използвате канала за синхронизация.
 - Използвайте struct{} за целта - безплатно от гледна точка на памет.
@@ -399,16 +355,16 @@ http://fmi.golang.bg/
 
     var sem = make(chan struct{}, MaxOutstanding)
 
-    func handle(r *Request) {
-        <-sem
-        process(r)
-        sem <- struct{}{}
-    }
-
     func init() {
         for i := 0; i < MaxOutstanding; i++ {
             sem <- struct{}{}
         }
+    }
+
+    func handle(r *Request) {
+        <-sem
+        process(r)
+        sem <- struct{}{}
     }
 
     func Serve(queue chan *Request) {
@@ -418,37 +374,15 @@ http://fmi.golang.bg/
         }
     }
 
-* Deadlock
-
-    func main() {
-         c := make(chan int)
-         c <- 42
-         val := <-c
-         println(val)
-    }
-
 
 * Затваряне на канали
 
-.play code/04/closing-channels.go
-
-* range
-
-Помните ли как ви казахме, че `range` е нещо супер яко?
-
-- Може да чете и от канали
-- Блокира, докато не получи следващата стойност
-- Излизаме от `for`, когато каналът бъде затворен
-
-    for val := range ch {
-        fmt.Printf("Recieved: %#v\n", val)
-    }
+.play code/concurrency101/closing-channels.go
 
 * Communicating sequential processes
 
 .image assets/hoare.jpg
 
-by Tony Hoare
+by C. A. R. Hoare
 
 .link http://usingcsp.com/cspbook.pdf
-

@@ -14,7 +14,7 @@ void *ticker(void *x_void_ptr) {
 int main() {
     pthread_t ticker_thread;
 
-    if(pthread_create(&ticker_thread, NULL, ticker, &x)) {
+    if(pthread_create(&ticker_thread, NULL, ticker, NULL)) {
         fprintf(stderr, "Error creating thread\n");
         return 1;
     }
