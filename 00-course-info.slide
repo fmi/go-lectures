@@ -158,11 +158,11 @@ http://fmi.golang.bg/
 
 * hello world
 
-.play code/intro/hello_world.go
+.play code/course-info/hello_world.go
 
 * hello world on steroids
 
-.play code/web-programming/http-server/http-server.go /func main/,/^}/
+.play code/course-info/hello_http.go /func main/,/^}/
 
 
 * Конспект
