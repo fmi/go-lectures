@@ -22,3 +22,7 @@
     title: 05. Типове и интерфейси
     date: 2016-11-15
     url: http://lectures.fmi.golang.bg/05-types_and_interfaces.slide
+6:
+    title: 06. Concurrency 102
+    date: 2016-11-22
+    url: http://lectures.fmi.golang.bg/06-concurrency102.slide
