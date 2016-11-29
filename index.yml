@@ -26,3 +26,7 @@
     title: 06. Concurrency 102
     date: 2016-11-22
     url: http://lectures.fmi.golang.bg/06-concurrency102.slide
+7:
+    title: 07. Обработване на грешки
+    date: 2016-11-29
+    url: http://lectures.fmi.golang.bg/07-errors_and_testing.slide
