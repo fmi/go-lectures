@@ -30,3 +30,8 @@
     title: 07. Обработване на грешки
     date: 2016-11-29
     url: http://lectures.fmi.golang.bg/07-errors_and_testing.slide
+8:
+    title: 08. Testing Must Go On
+    date: 2016-12-06
+    url: http://lectures.fmi.golang.bg/08-testing-continues.slide
+
