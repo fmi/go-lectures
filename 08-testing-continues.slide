@@ -71,7 +71,7 @@ http://fmi.golang.bg/
 .code code/errors_and_testing/table_test.go /func TestFibonacci/,/TABLE TEST OMIT/
 - От 1.7 има и подтестове които позволяват това да изглежда малко по добре в терминал
 
-* SubTets
+* SubTests
 
 .code code/errors_and_testing/table_test.go /func TestSubFibonacci/,/SUB TEST OMIT/
 
