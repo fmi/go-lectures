@@ -1,0 +1,340 @@
+Tools, Tips and Good Practices
+20.12.2016
+
+fmi@golang.bg
+http://fmi.golang.bg/
+@fmi_golang
+
+* Но преди това
+
+- Ще има ново домашно утре със срок до нова година
+- Напомняме, че 24.12.2016 е крайният срок за одобряване на идеи за проект
+- Ако нямате *одобрена* идея до тогава, ще се видим през септември 2017
+- На 17.01.2017 (вторник) ще има частична защита на проектите
+- Повече детайли за нея ще пуснем в новина
+- Ориентировъчни дати за пълната защита и втория тест: 18.02.2016 и 19.02.2016
+
+
+* Въпроси за "мъфини"
+
+* Въпрос за мъфин #1
+
+Как в Go може да направим сървър, говорещ HTTP 1.0, 1.1 и 2?
+
+- С `ListenAndServeTLS()` от `http` пакета
+- Забравихме да споменем, че HTTP/2 работи само с TLS връзки (т.е. само при https)
+
+* Въпрос за мъфин #2
+
+Кой е "най-важния" сървърен интерфейс в `http` пакета?
+
+    type Handler interface {
+            ServeHTTP(ResponseWriter, *Request)
+    }
+
+* Въпрос за мъфин #3
+
+Какво е `http.Request` и за какво се ползва?
+
+- Структура, описваща HTTP заявка, с полета като `Method`, `URL` и др.
+- Използва се при правене на изходящи HTTP заявки с `http.Client`
+- Също така и при обработка на входящи HTTP заявки с някой `http.Handler`
+
+* Въпрос за мъфин #4
+
+Какво представлява `http.ServeMux`?
+
+- Имплементация на `http.Handler` интерфейса
+- Сравнително прост multiplexer (a.k.a. разпределител) на HTTP заявки
+
+* И по същество...
+
+* Tools
+
+* The go tool
+
+.image assets/go-tool-all-the-things.jpg
+
+* The Go Toolkit
+
+- Go има богата екосистема с инструменти (както вградени, така и външни)
+- Едно от най-ценните неща в езика
+- Лесно се пишат нови инструменти: има пакет `go`, съдържащ пакети `ast`, `parser`, `build` и др.
+
+Вече сме говорили за някои от вградените инструменти:
+
+- `go`build` , `go`run` , `go`install` и `go`get`
+- `go`test`
+- `go`doc`
+- `go`fmt`
+- Останалите може да видите чрез `go`-h`
+- Допълнителни официални инструменти [[https://godoc.org/golang.org/x/tools]]
+
+* Test coverage
+
+- Вграден инструмент от Go 1.5
+- Можем да видим колко от кода ни се тества:
+
+    go test -cover
+
+- Ако искаме да знаем и кои части от кода са покрити от тестове:
+
+    go test -coverprofile <filename>
+    go tool cover -html <coverage_file> -o <html_result>
+
+- С `covermode` опцията може да определим как се смята покритието. Възможните опции са set,count и atomic
+
+* Примерен HTML output
+
+.image assets/code-coverage-html.png _ 1000
+
+* Race condition detection
+
+- Go идва с напълно интегриран в toolchain-а race condition detector
+- Runtime-а може да проверява за несинхронизиран достъп до споделени променливи и да се оплаква
+
+    $ go test -race mypkg    // test the package
+    $ go run -race mysrc.go  // compile and run the program
+    $ go build -race mycmd   // build the command
+    $ go install -race mypkg // install the package
+
+- Обикновено се използва при тестовете, тъй като хаби доста CPU и памет
+- Повече информация: [[https://blog.golang.org/race-detector]]
+
+* goimports
+
+ go get -u golang.org/x/tools/cmd/goimports
+
+- gofmt replacement, който също автоматично ви оправя import-ите
+- Маха ненужни import-и и добавя липсващи
+
+ goimports -w .
+
+* go fix
+
+Спомняте ли си как ви казахме че след версия 1.0 авторите са обещали, че каквото работи на 1.x ще работи на 1.y, където x < y ?
+
+Е да ама ... понякога се налага да се променят основни API-та.
+
+Ако след ъпдейт на go не ви се компилира проекта, можете просто да рънете:
+
+ go fix .
+
+Все пак понякога се правят по специални промени, за които това няма да помогне.
+
+
+* go vet
+
+Статичен анализатор на go код, който може и да ви спести доста главоболия. Проверява за често срещани грешки във вашия код и се оплаква, ако ги намери.
+
+Някои поддържани проверки:
+
+- грешни аргументи на методи от вида на Printf.
+- грешна сигнатура на някои често имплементирани методи от стандартните интерфейси.
+- грешни тагове на полета в struct.
+- недостижим код.
+- чести грешки в ползване на sync/atomic.
+- shadowed variables
+- и други.
+
+
+* golint
+
+"Официален" linter за Go от Google. Показва стилистични грешки.
+
+    go get -u github.com/golang/lint/golint
+
+И го викаме с : (drum rolls)
+
+    golint .
+
+или
+
+    golint ./...
+
+* Други linter-и
+
+[[https://github.com/alecthomas/gometalinter][gometalinter]] обединява и унифицира много различни вградени и външни инструменти за анализ на кода
+
+    go get -u github.com/alecthomas/gometalinter
+    gometalinter --install --update
+
+Включва:
+
+- Вече споменатите `go`fmt` , `go`vet` , `golint` и `goimports`
+- [[https://golang.org/x/tools/cmd/gotype][gotype]] - Синтактичен и семантичен анализ, подобен на Go компилатора
+- [[https://github.com/tsenart/deadcode][deadcode]] - Намира неизползван код
+- [[https://github.com/alecthomas/gocyclo][gocyclo]] - Изчислява [[https://en.wikipedia.org/wiki/Cyclomatic_complexity][цикломатичната сложност]] на функциите
+- [[https://github.com/opennota/check][varcheck]] - Намира неизползвани глобални променливи и константи
+- [[https://github.com/opennota/check][structcheck]] - Намира неизползвани полета на структури
+- [[https://github.com/opennota/check][aligncheck]] - Предпазва от неоптимално align-нати структури
+
+* ...
+
+- [[https://github.com/kisielk/errcheck][errcheck]] - Подсигурява, че error return стойностите се проверяват
+- [[https://github.com/mibk/dupl][dupl]] - Проверява за повтарящ се код
+- [[https://github.com/gordonklaus/ineffassign/blob/master/list][ineffassign]] - Проверява когато присвоявания към съществуващи променливи не се използват
+- [[https://github.com/mvdan/interfacer][interfacer]] - Предлага използването на по-малки интерфейси
+- [[https://github.com/mdempsky/unconvert][unconvert]] - Показва ненужни type conversions
+- [[https://github.com/jgautheron/goconst][goconst]] - Намира повтарящи се string-ове, които да станат константи
+- [[https://github.com/dominikh/go-simple][gosimple]] - Предлага начини за опростяване на кода
+- [[https://github.com/dominikh/go-staticcheck][staticcheck]] - Предпазва от грешки при извикването на някои чести функции
+
+\... и други! Прекалено тежко е да се се пуска всичко на всеки filesave, за разлика от `gofmt`, `goimports` или `golint`.
+
+Безценен е обаче като метрика и част от CI процес.
+
+* Online tools
+
+.link https://godoc.org/github.com/docker/libnetwork
+
+.link https://goreportcard.com/report/github.com/docker/libnetwork
+
+.link https://gocover.io/github.com/docker/libnetwork
+
+.link http://go-search.org/view?id=github.com%2fdocker%2flibnetwork
+
+.link https://gowalker.org/github.com/docker/libnetwork
+
+* gorename
+
+Позволява прецизно type-safe преименуване на неща в кода
+
+    go get -u golang.org/x/tools/cmd/gorename
+
+С даден файл
+
+    gorename -from filename.go::NameOfSomething -to NewNameOfSomething
+
+само разпознава какво е Something и го преименува в правилните файлове.
+
+Или
+
+    gorename -from '"site.com/package/path".structName[.MethodName]' -to NewNameOfSomething
+
+Преименува дадения идентификатор по даден пакет и идентификатор.
+
+Навярно няма да го ползвате ръчно.
+
+* Guru
+
+    go get -u golang.org/x/tools/cmd/guru
+
+Вие питате, а той ви отговаря  на въпроси относно кода ви.
+
+- implements
+- describe
+- callees
+- callers
+
+Не се ползва ръчно - или поне не лесно.
+
+[[http://golang.org/s/using-guru]]
+
+* Интеграция с редактори
+
+Повечето tool-ве описане до тук са писани с идеята, че ще бъдат интегрирани или поне с възможността да бъдат интегрирани в един или друг текстов редактор и цялостно IDE.
+
+- gocode и guru са добри примери за това.
+- между другото gocode е демон (тоест върви фоново) за context aware autocompletion.
+
+Общото между двата и причината да не ви показваме как се ползват ръчно е, че и двата работят с byte offset, а не с номера на редове.
+
+
+* build tags (restrictions)
+
+В go има едно нещо наречено build tag-ове или build restrictions
+
+Представлят подобен коментар някъде в началото на файла (още преди package):
+
+    // +build tagname
+
+Сигнализират на компилатора при какви обстоятелства да компилира или да не компилира даден файл
+
+ // +build linux
+ // +build !386
+
+казва само под linux, но не под 386
+
+Може да подаваме наши тагове с:
+
+    go build -tag tagname
+
+* go generate
+
+Mожете да укажeте, че искате дадена друга команда да бъде изпълнена върху кода. Use cases:
+
+- [[https://github.com/jteeuwen/go-bindata][go-bindata]] - ембедване на бинарни файлове в go код :)
+- [[https://github.com/clipperhouse/gen][gen]] - code generator, с който може да се постигне нещо като generics
+- [[https://golang.org/cmd/yacc/][go yacc]] - yet another compiler compiler (Go edition)
+- [[https://godoc.org/golang.org/x/tools/cmd/stringer][stringer]] - автоматично генерира pretty-print `String()` методи на константи
+- много други, както възможност и вие сами да си напишете
+
+Казвате какво и как искате да се пусне, като в началото на някой .go файл слагате:
+
+    //go:generate command args...
+
+И след това извиквате
+
+    go generate ./...
+
+
+* Command-line аргументи
+
+- Подадените от терминал аргументи се намират в `os.Args`
+- Но Обикновенно искаме да имаме флагове - `flag` ту дъ рескю
+
+ import "flag"
+
+ var stringVar string
+
+ func init() {
+     flag.StringVar(&stringVar,  "paramName", "help message")
+ }
+
+ func main() {
+     flag.Parse()
+     // do something with stringVar
+ }
+
+
+* Dependency Management
+
+- Да, `import`"github.com/keltia/leftpad"` е много як feature на езика
+- Но какво правим ако `leftpad` изчезне?
+- Или ако искаме нашите production build-ове да не се счупят от нова версия на произволно dependency?
+- Или ако искаме да ползваме точно `awesome-lib`v2.0.5-test2`?
+- А ако на един проект трябва версия 2.0.5, а на друг - версия 3.0.13?
+- Все пак имаме само една папка `$GOPATH/src/github.com/keltia/leftpad`
+
+* Vendoring
+
+- От Go 1.6 официално е включена поддръжка за т.нар. [[https://golang.org/cmd/go/#hdr-Vendor_Directories][vendoring]]
+- Накратко: можем да "копираме" дадени версии на external dependency-та в нашето repository
+- Звучи леко ужасно, нали?
+- В действителност далеч не е :)
+- Става автоматизирано и лесно с помощта на удобни [[https://github.com/golang/go/wiki/PackageManagementTools][инструменти]]
+- Всичко може да стане с помощта на интуитивни команди и конфигурационни файлове (примери [[https://github.com/kardianos/govendor/blob/master/vendor/vendor.json][1]], [[https://github.com/tools/godep/blob/master/Godeps/Godeps.json][2]], [[https://github.com/Masterminds/glide/blob/master/glide.yaml][3]])
+- Но това пак копира много код в нашето repo - хубаво за `leftpad`, но може да не ни харесва...
+- Ако искаме, може да използваме git submodules с инструменти като [[https://github.com/kovetskiy/manul][manul]], [[https://github.com/toxeus/gsv][gsv]] и [[https://github.com/dpw/vendetta][vendetta]]
+- Подготвя се и още по-добър package management за следващи версии
+
+* pprof
+
+В Go има вграден profiler, който се използва така:
+
+    import _ "net/http/pprof"
+
+И ако нямате HTTP сървър в програмата, трябва да дoбавите поне:
+
+    go func() {
+        http.ListenAndServe("localhost:6060", nil)
+    }()
+
+След това може да отидете на адреса и да разглеждате информация за heap-а, CPU usage, execution traces, горутини и др.
+
+Може да се използва и вградения command-line tool:
+
+    go tool pprof http://localhost:6060/debug/pprof/heap
+
+Повече информация има [[https://blog.golang.org/profiling-go-programs][тук]] и [[https://golang.org/pkg/net/http/pprof/][тук]]
