@@ -42,4 +42,8 @@
     title: 10. Tools, Tips and Good Practices
     date: 2016-12-20
     url: http://lectures.fmi.golang.bg/10-tools.slide
+11:
+    title: 11. Cgo и Go изцяло на Go
+    date: 2017-01-03
+    url: http://lectures.fmi.golang.bg/11-cgo-runtime.slide
 
