@@ -46,4 +46,8 @@
     title: 11. Cgo и Go изцяло на Go
     date: 2017-01-03
     url: http://lectures.fmi.golang.bg/11-cgo-runtime.slide
+12:
+    title: 12. Интересни имплементационни детайли в Go
+    date: 2017-01-10
+    url: http://lectures.fmi.golang.bg/12-goruntime.slide
 
