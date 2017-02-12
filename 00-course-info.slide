@@ -25,6 +25,19 @@ http://fmi.golang.bg/
 - Сериозно :)
 
 
+* Програма
+
+- 2017-02-13: Въведение в Go, функции и указатели
+- 2017-02-15: Структури от данни, concurrency 101 (goroutines & channels)
+- 2017-02-17: Типове и интерфейси, обработване на грешки
+- Първа задача
+- 2017-02-20: Concurrency 102 (sync, select, patterns), HTTP (web & services)
+- Втора задача
+- 2017-02-22: Testing, Tools, Tips and Good Practices
+- 2017-02-24: Runtime, Cgo, Internals
+- Ако остане време: networking, databases и каквото ви е интересно
+
+
 * В интернеда
 
 .link http://fmi.golang.bg
