@@ -1,11 +1,8 @@
 Въведение в Go
-11.10.2016
-
-https://play.golang.org/
+13.02.2017
 
 fmi@golang.bg
 http://fmi.golang.bg/
-@fmi_golang
 
 * Малко история
 
@@ -24,11 +21,11 @@ http://fmi.golang.bg/
 - *2014* - релийзнати са 1.3 и 1.4
 - *2015* - релийзната е 1.5
 - *2016* - релийзнати са 1.6 и 1.7
-
+- До края не месеца се очаква 1.8
 
 * C for the 21st century*
 
-- C е на *44*години*
+- C е на *45*години*, Python на 26, а Java на 21
 - *Хардуерът* се променя
 - *Проблемите*, които решаваме, също
 
@@ -38,8 +35,9 @@ http://fmi.golang.bg/
 - Java/C#: По-ефективен процес на разработка, компилация и контрол над зависимостите, за сметка на изпълнение и deployment
 - JavaScript/Python/Ruby: Изключително ефективен процес на разработка, без стъпка на компилация, но изключително бавно изпълнение
 
-- *: Трудна паралелизация и ефективност в мултипроцесорни системи
+Други критерии:
 
+- Паралелизация и ефективност в мултипроцесорни системи?
 - Safety?
 - Паралелизация и ефективност в мултипроцесорни системи?
 - Error detection - runtime vs. compile-time?
@@ -48,7 +46,7 @@ http://fmi.golang.bg/
 
 - Език с отворен код от сравнително ниско ниво (между C/C++ и Java/.NET)
 - C-подобен синтаксис
-- Дълбоко залегнала идея за конкурентност
+- Дълбоко залегнала идея за concurrency
 - Вграден, бърз и ефективен garbage collector
 - Безумно бърза компилация до машинен код
 - Минимален runtime, single statically-linked native executable
@@ -92,7 +90,7 @@ types hash adler32 crc32 crc64 fnv html template image color palette
 draw gif jpeg png index suffixarray io ioutil log syslog math big cmplx
 rand mime multipart quotedprintable net http cgi cookiejar fcgi httptest
 httptrace httputil pprof mail rpc jsonrpc smtp textproto url os exec signal user
-path filepath reflect regexp syntax runtime cgo debug msan pprof race trace
+path filepath plugin reflect regexp syntax runtime cgo debug msan pprof race trace
 sort strconv strings sync atomic syscall testing iotest quick text scanner
 tabwriter template parse time unicode utf16 utf8 unsafe
 
@@ -138,8 +136,6 @@ tabwriter template parse time unicode utf16 utf8 unsafe
 *** Windows
 
 .link https://golang.org/dl/ Използвате симпатичния инсталатор
-
-По време на курса ще използваме версия 1.7.1
 
 
 * Инсталация, епизод 2
@@ -271,14 +267,15 @@ tabwriter template parse time unicode utf16 utf8 unsafe
 
 - Всеки файл принадлежи на точно един пакет
 - `n` файла могат да са в един пакет (демек `filename` != `package`)
-- Стандартната библиотека е съставена от пакети като `fmt`, `os`...
+- Стандартната библиотека е съставена от пакети като `fmt`, `os`, `net/http`...
 - По конвенция, всяка директория съдържа точно един пакет
 - Очевидно, дадени пакети могат да използват други
+- Забранени са циклични зависимости
 
 Без значение от колко файла се състои:
 
-- всеки пакет се компилира като една самостоятелна единица
-- всичко, дефинирано в пакета, има видимимост във всички негови файлове
+- Всеки пакет се компилира като една самостоятелна единица
+- Всичко, дефинирано в пакета, има видимимост във всички негови файлове
 
 
 * One package to rule them all
@@ -449,7 +446,7 @@ _WTF!_WTF!_WTF!_ Защо типа е на грешното място!?
 
 .play code/intro/init.go
 
-За разлика от нормалните функции, за които ще си говорим следващия път, можем да имаме няколко `init()` функции в един пакет
+За разлика от нормалните функции, за които ще си говорим следващата лекция, можем да имаме няколко `init()` функции в един пакет
 
 
 * Unused variable
@@ -571,8 +568,6 @@ _Забележка:_ Отварящата `{` и тук е на същия ре
 Да, има и такова.
 
 Ако не знаете кога, не го ползвайте.
-
-Към момента допускаме, че още не знаете кога => не го ползвате.
 
 
 * Особености, с които се сблъскахте (Q&A)
