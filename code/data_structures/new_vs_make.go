@@ -10,5 +10,5 @@ func main() {
 	e := new(example)
 	e.attrs = make(map[string]int)
 	e.attrs["h"] = 42
-	fmt.Println(e)
+	fmt.Printf("%+v", e)
 }
