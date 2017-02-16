@@ -2,11 +2,6 @@ package main
 
 import "fmt"
 
-func main() {
-	f()
-	fmt.Println("Returned normally from f.")
-}
-
 func f() {
 	defer func() {
 		if r := recover(); r != nil {
@@ -26,5 +21,7 @@ func g(i int) {
 	fmt.Println("Printing in g", i)
 	g(i + 1)
 }
-
-//END OMIT
+func main() {
+	f()
+	fmt.Println("Returned normally from f.")
+}
