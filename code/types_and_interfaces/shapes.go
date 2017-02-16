@@ -34,7 +34,7 @@ func (r *Rectangle) Circumference() int {
 }
 
 func (t *Triangle) Area() float64 {
-	p := float64(t.Circumference() / 2)
+	p := float64(t.Circumference()) / 2
 	return math.Sqrt(p * (p - float64(t.X)) * (p - float64(t.Y)) * (p - float64(t.Z)))
 }
 
