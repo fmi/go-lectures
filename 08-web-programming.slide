@@ -1,73 +1,18 @@
 Web програмиране
-13.12.2016
+20.02.2017
 
 fmi@golang.bg
 http://fmi.golang.bg/
-@fmi_golang
-
-* Въпроси за мъфини
-
-* Въпрос за мъфин #1
-
-Какво трябва да направите до 24-ти декември
-
-- Да направите тема във форума с предложението си за проект
-- Да ни изръчкате да го коментираме и одобрим
-
-* Въпрос за мъфин #2
-
-Какво ще върне `recover()`, ако го извикаме без да сме в състояние на паника?
-
-- `nil`
-
-* Въпрос за мъфин #3
-
-Какво ще изведе този код:
-
-	x := []string{"a","b","c"}
-
-	for v := range x {
-	  fmt.Println(v)
-	}
-
-- 0
-- 1
-- 2
-
-* Въпрос за мъфин #4
-
-Какво прави `go`test`./...`?
-
-- Пуска всички тестове в този пакет и всички негови под пакети
-
-* Въпрос за мъфин #5
-
-Какво е example test и как се прави такъв?
-
-- Тест, който също така е част от документацията
-- Функция, която се казва `Example<нещо-с-главна-буква>`
-- В нея има коментар `//Output:...`, който се проверява срещи стандартния изход на функцията
 
 * TCP/IP
 
-- Проект на DARPA - целта е да е надеждно и в лицето на война
-- От телеграфи до Packet Switching
-- Надеждна комуникация през ненадеждна среда - Syn/Ack
-- Packet Congestion
-
-* Коректна имплементация е трудна
-
+- Коректната имплементация на TCP/IP stack е трудна задача
 - Но за щастие в Go имаме `net`
 - Всичката сложност се свежда до
 
-	conn, err := net.Dial("tcp", "golang.org:80")
-	if err != nil {
-		// handle error
-	}
-	fmt.Fprintf(conn, "GET / HTTP/1.0\r\n\r\n")
-	status, err := bufio.NewReader(conn).ReadString('\n')
+.play code/web-programming/net-example.go
 
-* `net` е ваш приятел
+* net е ваш приятел
 
 - Съдържа функции и типове, удобни за работа с всички популярни network протоколи
 - Освен простият интерфейс, дава и достъп до най - ниско ниво
@@ -80,12 +25,12 @@ http://fmi.golang.bg/
 - Интересни са SetDeadline, SetReadDeadline, SetWriteDeadline
 - Всякакъв вид "връзка" - TCP, UDP, Unix
 
-* net.Conn implementations
+Имплементации:
 
 - net.IPConn
 - net.TCPConn
+- net.UDPConn
 - net.UnixConn
-- etc
 
 
 * net.Dial
@@ -122,11 +67,6 @@ http://fmi.golang.bg/
 		}
 		go handleConnection(conn)
 	}
-
-* Няколко други интересни дреболии
-
-- net.Pipe() (Conn, Conn)
-- net.FileConn(f *os.File) (c Conn, err error)
 
 * HTTP
 
@@ -165,7 +105,7 @@ http://fmi.golang.bg/
 - Лесно и почти прозрачно поддържа и HTTPS заявки и сървъри
 - От версия 1.6 вече си имаме вградена поддръжка за HTTP 2.0
 - И преди това имаше, просто беше тук [[https://golang.org/x/net/http2]]
-- От версия 1.8 ще има и HTTP 2.0 server push
+- От версия 1.8 има и HTTP 2.0 server push
 
 * Защо!?
 
@@ -323,6 +263,11 @@ http://fmi.golang.bg/
 		Hijack() (net.Conn, *bufio.ReadWriter, error)
 	}
 
+	type Pusher interface {
+	    // Push initiates an HTTP/2 server push. [...]
+	    Push(target string, opts *PushOptions) error
+	}
+
 * http.RoundTripper и http.Transport
 
 `http.RoundTripper` е абстракцията за изпълнение на единична HTTP request-response транзакция:
@@ -350,12 +295,11 @@ http://fmi.golang.bg/
 - В `httptest` има вградени `ResponseRecorder` и `Server` имплементации за брутално лесни HTTP end-to-end тестове
 
 
+
 * http.Pusher (in 1.8)
 
-- Ще се появи във версия 1.8
+- Вече във версия 1.8
 - Позволява на сървъра да прати ресурс към бразъра преди още да е бил поискан
-
-* Пример за push (in 1.8)
 
 	http.Handle("/index.html", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// server push is available if w implements http.Pusher
@@ -473,7 +417,7 @@ http://fmi.golang.bg/
 * Как се ползва?
 
 - Всеки контекст е "наследник" на друг
-- От "root" контекста се създава нов за всяка заявка или дор под-операция
+- От "root" контекста се създава нов за всяка заявка или дори под-операция
 - Този контекст се предава като аргумент на всички handler-и и функции, занимаващи се със заявката
 
 * Пример
