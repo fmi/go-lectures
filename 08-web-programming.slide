@@ -385,21 +385,23 @@ http://fmi.golang.bg/
 	<a onx='pattern = /{{.}}/;'>     O\x27Reilly: How are \x3ci\x3eyou...\x3f
 
 
-* Gorilla
+* Богата community екосистема
 
-Няколко библиотеки, които ще улеснят живота ви по темата
+- Предимно малки библиотеки
+- Използват абстракциите от стандартната библиотека и градят върху тях
 
-- gorilla/context
-- gorilla/mux
-- gorilla/reverse
-- gorilla/rpc
-- gorilla/schema
-- gorilla/securecookie
-- gorilla/sessions
-- gorilla/websocket
+[[https://github.com/avelino/awesome-go#web-frameworks]]
+[[https://github.com/golang/go/wiki/Projects#http]]
 
-.link http://www.gorillatoolkit.org/
 
+
+* Websockets example
+
+.play code/web-programming/websockets.go
+
+* Websockets example 2
+
+.play code/web-programming/websockets-2.go /func main/,
 
 * context
 
