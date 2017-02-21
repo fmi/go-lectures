@@ -1,5 +1,5 @@
 Web програмиране
-20.02.2017
+22.02.2017
 
 fmi@golang.bg
 http://fmi.golang.bg/
@@ -170,6 +170,42 @@ http://fmi.golang.bg/
 
 .play code/web-programming/http-server.go /func main/,/^}/
 
+* Стартиране на сървър
+
+	http.ListenAndServe(":12345", myHandlerOrNil)
+
+или
+
+	http.ListenAndServeTLS(":10443", "cert.pem", "key.pem", myHandlerOrNil)
+
+или
+
+	s := &http.Server{
+		Addr:           ":8080",
+		Handler:        myHandlerOrNil,
+		ReadTimeout:    10 * time.Second,
+		// ...
+	}
+	s.ListenAndServe()  // or s.ListenAndServeTLS()
+
+- Ако не подадете handler, използва се `http.DefaultServeMux`
+- Всяка заявка се обработва в нова горутина
+- За HTTP2 трябва да ползвате `ListenAndServeTLS()`
+
+* http.Handler
+
+	type Handler interface {
+		ServeHTTP(ResponseWriter, *Request)
+	}
+
+- Основния градивен блок на всеки уеб сървър
+- Може да се викат един в друг като всеки може да променя ResponseWriter-а и Request-а
+- ... или да подава различни на следващия, или да не вика следващ изобщо
+- За улеснение имаме и тип `http.HandlerFunc`, за който горният интерфейс е имплементиран:
+	type HandlerFunc func(ResponseWriter, *Request)
+- Последният аргумент на ListenAndServe е първият Handler за всяка заявка
+- Ако той е nil то се използва DefaultServeMux...
+
 * Получаване на клиентски заявки
 
 - `http.Request` се използва и за получаването на клиентски заявки
@@ -208,19 +244,7 @@ http://fmi.golang.bg/
 
 за да отговаряме на HTTP заявки...
 
-* http.Handler
 
-	type Handler interface {
-		ServeHTTP(ResponseWriter, *Request)
-	}
-
-- Основния градивен блок на всеки уеб сървър
-- Може да се викат един в друг като всеки може да променя ResponseWriter-а и Request-а
-- ... или да подава различни на следващия, или да не вика следващ изобщо
-- За улеснение имаме и тип `http.HandlerFunc`, за който горният интерфейс е имплементиран:
-	type HandlerFunc func(ResponseWriter, *Request)
-- Всъщност последния аргумент в ListenAndServe е първия Handler за всяка заявка
-- Ако той е nil то се използва DefaultServeMux...
 
 
 * Mux - що е то?
