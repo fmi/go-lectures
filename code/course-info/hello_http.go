@@ -17,8 +17,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer res.Body.Close()
+	
 	contents, err := ioutil.ReadAll(res.Body)
-	res.Body.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
