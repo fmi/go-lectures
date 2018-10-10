@@ -1,53 +1,5 @@
 0:
     title: 00. Нулева лекция
-    date: 2016-10-04
+    date: 2018-10-03
     url: http://lectures.fmi.golang.bg/00-course-info.slide
-1:
-    title: 01. Въведение в Go
-    date: 2016-10-11
-    url: http://lectures.fmi.golang.bg/01-intro.slide
-2:
-    title: 02. Функции и указатели
-    date: 2016-10-18
-    url: http://lectures.fmi.golang.bg/02-funcs_and_pointers.slide
-3:
-    title: 03. Структури от данни
-    date: 2016-10-25
-    url: http://lectures.fmi.golang.bg/03-data_structures.slide
-4:
-    title: 04. Concurrency 101
-    date: 2016-11-08
-    url: http://lectures.fmi.golang.bg/04-concurrency101.slide
-5:
-    title: 05. Типове и интерфейси
-    date: 2016-11-15
-    url: http://lectures.fmi.golang.bg/05-types_and_interfaces.slide
-6:
-    title: 06. Concurrency 102
-    date: 2016-11-22
-    url: http://lectures.fmi.golang.bg/06-concurrency102.slide
-7:
-    title: 07. Обработване на грешки
-    date: 2016-11-29
-    url: http://lectures.fmi.golang.bg/07-errors_and_testing.slide
-8:
-    title: 08. Testing Must Go On
-    date: 2016-12-06
-    url: http://lectures.fmi.golang.bg/08-testing-continues.slide
-9:
-    title: 09. Web програмиране
-    date: 2016-12-13
-    url: http://lectures.fmi.golang.bg/09-web-programming.slide
-10:
-    title: 10. Tools, Tips and Good Practices
-    date: 2016-12-20
-    url: http://lectures.fmi.golang.bg/10-tools.slide
-11:
-    title: 11. Cgo и Go изцяло на Go
-    date: 2017-01-03
-    url: http://lectures.fmi.golang.bg/11-cgo-runtime.slide
-12:
-    title: 12. Интересни имплементационни детайли в Go
-    date: 2017-01-10
-    url: http://lectures.fmi.golang.bg/12-goruntime.slide
 
