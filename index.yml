@@ -1,9 +1,9 @@
 0:
     title: 00. Нулева лекция
     date: 2018-10-03
-    url: http://lectures.fmi.golang.bg/00-course-info.slide
+    url: https://lectures.fmi.golang.bg/00-course-info.slide
 1:
     title: 01. Въведение в Go
     date: 2018-10-10
-    url: http://lectures.fmi.golang.bg/01-intro.slide
+    url: https://lectures.fmi.golang.bg/01-intro.slide
 
