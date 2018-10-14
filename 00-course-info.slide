@@ -168,3 +168,17 @@ http://fmi.golang.bg/
 * hello world on steroids
 
 .play code/course-info/hello_http.go /func main/,/^}/
+
+* The Go gopher
+
+Вид гризач
+
+Създаден от [[https://www.instagram.com/reneefrench][Renée French]]
+
+[[https://blog.golang.org/gopher][История]]
+
+И отговорът на въпроса, който всички си задавате...
+
+_да_, можете да го купите от [[https://gopher.golangmarket.com]]
+
+.image assets/gopher-full.png
