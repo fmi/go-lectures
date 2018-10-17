@@ -6,4 +6,8 @@
     title: 01. Въведение в Go
     date: 2018-10-10
     url: https://lectures.fmi.golang.bg/01-intro.slide
+2:
+    title: 02. Функции и указатели
+    date: 2018-10-17
+    url: https://lectures.fmi.golang.bg/02-funcs_and_pointers.slide
 
