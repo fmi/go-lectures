@@ -18,4 +18,8 @@
     title: 04. Типове и интерфейси
     date: 2018-10-31
     url: https://lectures.fmi.golang.bg/04-types_and_interfaces.slide
+5:
+    title: 05. Concurrency 101
+    date: 2018-11-07
+    url: https://lectures.fmi.golang.bg/05-concurrency101.slide
 
