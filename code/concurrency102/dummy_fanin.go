@@ -19,9 +19,9 @@ func talk(msg string) <-chan string { // HL
 
 func main() {
 	doycho := talk("Doycho") // HL
-	ned := talk("Ned")       // HL
+	misho := talk("Misho")   // HL
 	for i := 0; i < 5; i++ {
 		fmt.Println(<-doycho)
-		fmt.Println(<-ned)
+		fmt.Println(<-misho)
 	}
 }

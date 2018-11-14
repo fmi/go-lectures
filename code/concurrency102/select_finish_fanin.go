@@ -49,11 +49,11 @@ func fanIn(input1, input2 <-chan string, finish chan struct{}) <-chan string { /
 // MAIN START OMIT
 func main() {
 	wg.Add(1)
-	finish := make(chan struct{})            // HL
-	c := fanIn(talk("A"), talk("B"), finish) // HL
+	finish := make(chan struct{})                     // HL
+	c := fanIn(talk("Doycho"), talk("Misho"), finish) // HL
 	for value := range c {
 		fmt.Println(value)
-		if len(value) > 4 {
+		if len(value) > 9 {
 			close(finish)
 		}
 	}

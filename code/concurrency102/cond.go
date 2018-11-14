@@ -33,7 +33,6 @@ func (q *Queue) IsEmpty() bool {
 var (
 	cond      *sync.Cond = sync.NewCond(new(sync.Mutex))
 	workQueue Queue
-	wg        sync.WaitGroup
 )
 
 func produce() {
@@ -63,10 +62,8 @@ func consume(name string) {
 }
 
 func main() {
-	wg.Add(1)
 	go consume("First")
 	go consume("Second")
 	go consume("Third")
-	go produce()
-	wg.Wait()
+	produce()
 }

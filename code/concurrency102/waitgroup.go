@@ -11,7 +11,7 @@ func main() {
 	var urls = []string{
 		"http://www.golang.org/",
 		"http://www.google.com/",
-		"http://www.somestupidname.com/",
+		"http://does-not-exists-for-real.com/",
 	}
 	for _, url := range urls {
 		wg.Add(1) // Increment the WaitGroup counter.

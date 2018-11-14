@@ -1,0 +1,280 @@
+Concurrency 102
+14.11.2018
+
+fmi@golang.bg
+http://fmi.golang.bg/
+@fmi_golang
+
+* Но преди това...
+
+- Изберете си проект. Краен срок: Бъдни вечер
+- Първи тест на 28.11.2018 (по - следващата седмица)
+- Днес ще пуснем ново домашно
+
+* Въпроси за мъфин #1
+
+- Какво е канал в го и трябва ли ви водопроводчик?
+
+Тип в езика
+Служи за комуникация между go рутини
+В него може да се четат и пишат стойности от конкретен тип
+
+* Въпрос за мъфин #2
+
+- Какъв ще е резултатът от кода?
+
+  func worker(val string) {
+    fmt.Prinln(val)
+  }
+
+  func main() {
+      go worker("one")
+      go worker("two")
+      worker("three")
+      time.Sleep(10 * time.Second)
+  }
+
+Не е ясно. Нещата се изпълняват конкурентно.
+
+* Въпрос за мъфин #3
+
+- Кога завършва вашия процес?
+
+Когато главната go рутина завърши.
+Независимо колко други живи има.
+
+* Въпрос за мъфин #4
+
+- Какво става когато четеш от `nil` канал? Когато пишеш?
+
+Четене: блокира за винаги
+Писане: блокира за винаги
+
+* Въпрос за мъфин #5
+
+- Ами за затворен канал? А ако се опиташ да го затвориш отново?
+
+Четене: връща нулевата стойност на типа на канала
+Писане: паника
+Затваряне: паника
+
+* Concurrency 102
+
+* Ще си говорим за
+
+- sync
+- select
+- patterns
+
+* Да си спомним скуката
+
+.play code/concurrency102/go-less-boring-sleep.go /^func main/,/^}/
+
+- Грозен `time.Sleep`
+- Ако искаме да гледаме скуката точно определен брой пъти?
+
+* sync
+
+[[https://golang.org/pkg/sync/][sync]] е пакет, който ни дава синхронизационни примитиви от сравнително ниско ниво:
+
+- `Cond`
+- `Mutex` и `RWMutex`
+- `Once`
+- `Pool`
+- `WaitGroup`
+
+един полезен интерфейс:
+
+    type Locker interface {
+        Lock()
+        Unlock()
+    }
+
+и подпакет `atomic` с low-level memory примитиви
+
+* WaitGroup
+
+Изчаква колекция от горутини да приключат и чак тогава продължава с изпълнението.
+Така не правим простотии със `time.Sleep`, както преди.
+
+    type WaitGroup struct {}
+
+    func (*WaitGroup) Add(delta int)
+    func (*WaitGroup) Done()
+    func (*WaitGroup) Wait()
+
+* Пример
+
+.play code/concurrency102/boring-with-sync.go /^func main/,/^}/
+
+Стига вече с тая скука!
+
+* По - интересен пример
+
+.play code/concurrency102/waitgroup.go /^func main/,/^}/
+
+
+* Mutex
+
+    type Mutex struct {}
+
+    func (*Mutex) Lock()
+    func (*Mutex) Unlock()
+
+- Дава достъп до даден ресурс само на една горутина по едно и също време
+- Ако втора се опита да го достъпи, тя чака, докато ресурсът не бъде освободен
+- Ако много горутини чакат за един ресурс, достъп се дава на една от тях на случаен принцип
+- Има смисъл да се ползва като `private` атрибут на наш тип
+- `Unlock()` е добра идея да бъде в `defer`
+- Имплементира интерфейса `sync.Locker`
+
+* В код
+
+.play code/concurrency102/mutex.go /^func main/,/^}/
+
+* На каналски
+
+.play code/concurrency102/mutex_chan.go /^func main/,/^}/
+
+* RWMutex
+
+- Дава thread-safe достъп до споделен ресурс (променлива) от множество горутини
+- Дава достъп до ресурса в даден момент само на *един* writer или на произволен брой readers
+- По-ефективен от `Mutex` при ситуации, в които част от горутините само четат
+
+    type RWMutex struct {}
+    func (*RWMutex) Lock()
+    func (*RWMutex) Unlock()
+    func (*RWMutex) RLock()
+    func (*RWMutex) RUnlock()
+    func (*RWMutex) RLocker() sync.Locker
+
+- Също имплементира `sync.Locker`
+- Може да бъде "държана" от произволен брой "четци" или точно един "писар"
+- `RLock` блоква само докато някой използва `Lock`
+- Ако извикате някой unlock на незаключен mutex - run-time error
+- `RLocker()` връща `Locker`, който ще използва `RLock` и `RUnlock` на оригинала
+
+* Once
+
+Обект от този тип ще изпълни точно една функция.
+
+.play code/concurrency102/once.go /^func main/,/^}/
+
+* Cond
+
+    type Cond struct {
+        L Locker // this is held while observing or changing the condition
+        // other unexported fields ...
+    }
+
+    func NewCond(l Locker) *Cond
+
+    func (c *Cond) Wait()
+    func (c *Cond) Broadcast()
+    func (c *Cond) Signal()
+
+- Нарича се `condition-variable` или `monitor`
+- Синхронизира горутини на принципа на съобщаването за настъпване на дадено събитие
+- Напълно в реда на нещата е да бъде част от наша структура
+- *Никога* не трябва да го копирате след като решите да го ползвате!
+
+* Cond Demo
+
+Demo `./code/concurrency102/cond.go`
+
+* select
+
+* select
+
+   select {
+   case v1 := <-c1:
+       fmt.Printf("received %v from c1\n", v1)
+   case v2 := <-c2:
+       fmt.Printf("received %v from c2\n", v2)
+   case c3 <- 5:
+       fmt.Println("send 5 to c3")
+   default:
+       fmt.Printf("no one was ready to communicate\n")
+   }
+
+
+Накратко: `switch` за канали.
+Надълго: изчаква първия case, по който е изпратена или получена стойност
+
+- Ако по никой от каналите няма "движение", изпълнява `default`
+- Ако няма `default` блокира и изчаква
+- Няма определен ред: ако няколко не-default case-а са възможни, избира се случаен
+- Важна част от различни concurrency patterns в Go
+
+* Въпрос
+
+Какво би направил следния код?
+
+.play code/concurrency102/indeterminate-select.go /^func main/,
+
+Не се знае.
+
+* Concurrency patterns
+
+* Timeout
+
+.play code/concurrency102/timeout.go /^func fetch/,
+
+
+* Игра на развален телефон
+
+.image assets/gophereartrumpet.jpg
+
+- или колко точно са бързи и евтини горутините?
+
+* Игра на развален телефон
+
+.play code/concurrency102/daisy-chain.go /START/,/END/
+
+
+* Generators
+
+.play code/concurrency102/fib.go
+
+
+* Fan In
+
+.play code/concurrency102/dummy_fanin.go /^func talk/,
+
+- Какъв е проблемът тук?
+
+* Fan In
+
+.image assets/fanin.jpg
+
+* Fan In <- Concurrency
+
+.play code/concurrency102/select_fanin.go /func fanIn/,
+
+* Finish channel
+
+.code code/concurrency102/select_finish_fanin.go /FANIN START/,/FANIN END/
+
+* Finish channel
+
+.play code/concurrency102/select_finish_fanin.go /MAIN START/,/MAIN END/
+
+* Words of wisdom
+
+- Всичко това е забавно, но не ставайте човека с чука
+- Го рутините и каналите са инструменти за построяване на програми
+- Но понякога ви трябва просто брояч
+- Инструменти за малките проблеми могат да бъдат намерени в "sync" и "sync/atomic"
+- Често всички тези неща ще работят заедно за да се справят с по - големите проблеми
+- Използвайте правилния инструмент за задачата
+
+* И отново:
+
+- Изберете си проект. Краен срок: Бъдни вечер
+- Първи тест на 28.11.2018
+- Домашно днес
+
+* Следващия път
+
+Тестове и обработване на грешки

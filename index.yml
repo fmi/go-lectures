@@ -22,4 +22,8 @@
     title: 05. Concurrency 101
     date: 2018-11-07
     url: https://lectures.fmi.golang.bg/05-concurrency101.slide
+6:
+    title: 06. Concurrency 102
+    date: 2018-11-14
+    url: https://lectures.fmi.golang.bg/06-concurrency102.slide
 
