@@ -26,4 +26,8 @@
     title: 06. Concurrency 102
     date: 2018-11-14
     url: https://lectures.fmi.golang.bg/06-concurrency102.slide
+7:
+    title: 07. Грешки, тестове и документация
+    date: 2018-11-21
+    url: https://lectures.fmi.golang.bg/07-errors_and_testing.slide
 
