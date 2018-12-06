@@ -30,4 +30,12 @@
     title: 07. Грешки, тестове и документация
     date: 2018-11-21
     url: https://lectures.fmi.golang.bg/07-errors_and_testing.slide
+8:
+    title: 08. За домашното
+    date: 2018-11-28
+    url: https://lectures.fmi.golang.bg/08-homework-retrospective.slide
+9:
+    title: 09. Go Tools
+    date: 2018-12-05
+    url: https://lectures.fmi.golang.bg/09-tools.slide
 
