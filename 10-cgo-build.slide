@@ -1,0 +1,549 @@
+Cgo и build дълбини
+12.12.2018
+
+fmi@golang.bg
+http://fmi.golang.bg/
+@fmi_golang
+
+* Но преди това
+
+- Изберете си проект
+- През януари ще има първоначална мини-защита на проектите (по желание)
+- Ще напишем в новина какво точно очакваме
+
+* Въпроси за мъфини
+
+
+* Въпрос #1
+
+Какво прави `go`generate`./...`? Как?
+
+- Изпълнява команди, зададени в кода
+- Чете коментари от типа `//go:generate`command`--args`
+
+* Въпрос #2
+
+Къде можете да видите документацията на `gitlab.com/ivan/libawesome`?
+
+- На [[https://godoc.org/gitlab.com/ivan/libawesome]]
+
+* Въпрос #3
+
+Кога работи вградения race detector? Как се ползва?
+
+- Само когато изпълнението премине през място, в което има проблем
+- `go`test`-race`
+- `go`run`-race`
+- `go`build`-race`
+- `go`install`-race`
+
+* Въпрос #4
+
+Как мога да направя файл в пакет, който се build-ва само в Линукс?
+
+- С коментар `//`+build`linux` в началото му
+- Да наименувам файла `*_linux.go`
+
+* Въпрос #5
+
+
+
+* Днес ще видите
+
+- cgo
+- unsafe
+- GODEBUG
+
+* C? Go? Cgo!
+
+* C в .go файлове
+
+- Споменавали сме ви, че можете да използвате C библиотеки в go
+- Бърз пример как се прави:
+
+.code code/cgo-runtime/cgo.go
+
+- Няма пакет "C"
+
+* Особености
+
+- Коментарите трябва да се точно преди импорта на "C"
+- Те стават header на компилирания С сорс
+- Коментари, започващи с `#cgo` са "специални"
+
+    // #cgo CFLAGS: -DPNG_DEBUG=1
+    // #cgo amd64 386 CFLAGS: -DX86=1
+    // #cgo LDFLAGS: -lpng
+    // #include <png.h>
+    import "C"
+
+- CPPFLAGS and LDFLAGS  могат да бъдат "наследявани" от други пакети:
+
+    // #cgo pkg-config: png cairo
+
+
+* Go в .c файлове (1)
+
+- А вече може да използвате Go библиотеки в C
+
+.code code/cgo-runtime/goc/goc.go
+
+- Важното: //export <function-name>
+
+* Go в .c файлове (2)
+
+    go build -buildmode=c-archive -o goc.a goc.go
+
+- Ще се генерират `goc.a` и `goc.h` файлове
+- В `goc.h`, освен малко boilerplate, ще има и:
+
+    extern void GreetFromGo(GoString p0);
+
+- `GoString` е част от споменатия boilerplate
+
+* Go в .c файлове (3)
+
+- Сега можем да го използваме
+
+.code code/cgo-runtime/goc/goc.c
+
+- След това събираме всичко със
+
+    gcc -pthread -o out goc.c goc.a
+
+* Никога не е толкова просто
+.link https://github.com/golang/go/wiki/cgo
+.link https://golang.org/src/cmd/cgo/doc.go
+
+Стигне ли се до компилиране на C, забравете за лесно:
+
+- Статично линкване
+- Cross компилиране
+
+Но, за това пък, има много от:
+
+- Wrapper-и във wrapper-и
+- Ръчно управление на памет
+- Увещаване на linker-а да ви събере всичките частички
+
+* Ситният шрифт (2)
+
+Споделяне на памет, алокирана от Go е възможно ако:
+
+- споделената памет не съдържа указатели към друга алокирана от Go памет
+- C не задържи указателя към паметта, след като върне
+
+runtime проверява за това и ако види нарушение crash-ва програмата.
+
+
+* Още от магиите на "C"
+
+- В .go файловете, полетата на структури са достъпни с _. Ако в структурата x има поле foo, то е достъпно с x._foo
+- Стандартните типове са достъпни през C, с леки промени. `unsigned`int` -> `C.uint`
+- Директният достъп до struct, union или enum също е особен: `C.struct_foo`
+- В този ред на мисли go не съпортва union, а се представят като масиви от байтове
+- И докато сме на темата с ограниченията, не можете да вкарвате поле със C тип в go struct
+
+
+* Error handling
+
+- Няма нужда да се отказвате от адекватния error handling
+- Всяка C функция може да се извиква с две стойности от ляво. Втората очевидно е `errno`
+
+
+    n, err := C.sqrt(-1)
+
+
+* Function pointers
+
+- Лошата новина: не може да викате функция по указател
+- Добрата новина: можете да я пазите в променлива
+
+* Мoля?
+
+.code code/cgo-runtime/func_point.go
+
+
+* Друг начин за викане на Go от C
+
+    package main
+
+    func Add(a, b int) int {
+        return a + b
+    }
+
+
+* Друг начин за викане на Go от C (2)
+
+    #include <stdio.h>
+
+    extern int go_add(int, int) __asm__ ("example.main.Add");
+
+    int main() {
+      int x = go_add(2, 3);
+      printf("Result: %d\n", x);
+    }
+
+
+* Друг начин за викане на Go от C (3)
+
+- Само за `gccgo`
+- Спомняте ли си, че има и друг компилатор?
+
+    all: main
+
+    main: foo.o bar.c
+        gcc foo.o bar.c -o main
+
+    foo.o: foo.go
+        gccgo -c foo.go -o foo.o -fgo-prefix=example
+
+    clean:
+        rm -f main *.o
+
+
+* Указатели без граници
+
+- Ако си играете със C рано или късно ще попаднете на void*
+- Навярно ще ви се наложи и да освободите паметта сочена от указател, който ви е бил върнат
+- Може даже да ви се наложи да заделите памет и да подадете указател (като void*) на някоя C функция
+- void* на Go-шки е unsafe.Pointer
+
+
+* package unsafe
+
+Декларира _невинно_ изглеждащите:
+
+- `func`Alignof(v`ArbitraryType)`uintptr`
+- `func`Offsetof(v`ArbitraryType)`uintptr`
+- `func`Sizeof(v`ArbitraryType)`uintptr`
+- `type`ArbitraryType`int`
+- `type`Pointer`*ArbitraryType`
+
+реално тези дефиниции съществуват главно за документация, имплементацията е в компилатора.
+
+* Safety third
+
+unsafe.Pointer има четири важни харектеристики
+
+- указател към какъв да е тип може да бъде конвертиран към unsafe.Pointer
+- unsafe.Pointer може да бъде конвертиран към указател към какъв да е тип
+- uintpr може да бъде конвертиран към unsafe.Pointer
+- unsafe.Pointer може да бъде конвертиран към uintptr
+
+Това е практическо заобикаляне на типовата система в Go.
+
+* Unsafe пример:
+
+.play code/cgo-runtime/unsafe.go
+
+
+* Адресна аритметика:
+
+.play code/cgo-runtime/unsafe_2.go /struct/,
+
+
+* Go in Go
+
+* С? Защо?
+
+- Вече готови инструменти в Plan9
+- Познавайки тези иструменти, могат да се движат бързо
+
+* Компилатор
+
+- Вече изцяло на Go, всичкото С го няма
+- Не го правят за да се тупат в гърдите
+- Коректно Go се пише по - лесно от коректно С
+- ... и се дебъгва по - лесно, дори без дебъгер
+- Go прави параленото изпълнение тривиално
+
+* Runtime
+
+- До 1.5 са имали нужда от специален компилатор за runtime-а на езика
+- Вече го няма. Един компилтор по - малко.
+- Само един език. По - лесна интеграция, управление на стека
+- Простота
+
+* Как се махат хиляди редове С?
+
+- Транслатор от С до (лошо!) Go
+- Специално написан за тази задача, далеч от генерален
+- Махане на странни С идиоми (*p++)
+- Statement by statement принтиране на Go код от С
+- Compile, Run, Compare, Repeat
+.link https://www.youtube.com/watch?v=cF1zJYkBW4A&feature=youtu.be
+
+* Също преминали в Go Land:
+
+- Assembler
+- Linker
+
+* Go assembler
+
+- Го има собствен assembler език
+- ЗАЩО!?
+
+* Go assembler
+
+- Повечето assembler езици са почти еднакви
+- Не вярвате?
+
+* IBM System/360
+
+    1        PRINT NOGEN
+    2 STOCK1 START 0
+    3 BEGIN  BALR  11,0
+    4        USING *,11
+    5        MVC   NEWOH,OLDOH
+    6        AP    NEWOH,RECPT
+    7        AP    NEWOH,ISSUE
+    8        EOJ
+    11 OLDOH DC    PL4'9'
+    12 RECPT DC    PL4'4'
+    13 ISSUE DC    PL4'6'
+    14 NEWOH DS    PL4
+    15       END   BEGIN
+
+
+* Apollo 11 Guidance Computer
+
+    # TO ENTER A JOB REQUEST REQUIRING NO VAC AREA:
+
+              COUNT     02/EXEC
+                    
+    NOVAC     INHINT
+              AD        FAKEPRET     # LOC(MPAC +6) - LOC(QPRET)
+              TS        NEWPRIO      # PRIORITY OF NEW JOB + NOVAC C(FIXLOC)
+
+              EXTEND
+              INDEX     Q            # Q WILL BE UNDISTURBED THROUGHOUT.
+              DCA       0            # 2CADR OF JOB ENTERED.
+              DXCH      NEWLOC
+              CAF       EXECBANK
+              XCH       FBANK
+              TS        EXECTEM1
+              TCF       NOVAC2       # ENTER EXECUTIVE BANK.
+
+* Използван за ходене до луната
+
+.image assets/hamilton-code.jpg
+
+Маргарет Хамилтън
+
+* PDP-10
+
+    TITLE   COUNT
+     
+    A=1                             ;Define a name for an accumulator.
+
+    START:  MOVSI A,-100            ;initialize loop counter.
+                                    ;A contains -100,,0
+    LOOP:   HRRZM A,TABLE(A)        ;Use right half of A to index.
+            AOBJN A,LOOP            ;Add 1 to both halves (-77,,1 -76,,2 etc.)
+                                    ;Jump if still negative.
+            .VALUE                  ;Halt program.
+
+    TABLE:  BLOCK 100               ;Assemble space to fill up.
+
+    END START                       ;End the assembly.
+
+* PDP-11
+
+    / a3 -- pdp-11 assembler pass 1
+
+    assem:
+            jsr     pc,readop
+            jsr     pc,checkeos
+            br      ealoop
+            tst     ifflg
+            beq     3f
+            cmp     r4,$200
+            blos    assem
+            cmpb    (r4),$21   /if
+            bne     2f
+            inc     ifflg
+    2:
+            cmpb    (r4),$22   /endif
+            bne     assem
+            dec     ifflg
+            br      assem
+
+* Motorola 68000
+
+    strtolower      public
+                    link    a6,#0           ;Set up stack frame
+                    movea   8(a6),a0        ;A0 = src, from stack
+                    movea   12(a6),a1       ;A1 = dst, from stack
+    loop            move.b  (a0)+,d0        ;Load D0 from (src)
+                    cmpi    #'A',d0         ;If D0 < 'A',
+                    blo     copy            ;skip
+                    cmpi    #'Z',d0         ;If D0 > 'Z',
+                    bhi     copy            ;skip
+                    addi    #'a'-'A',d0     ;D0 = lowercase(D0)
+    copy            move.b  d0,(a1)+        ;Store D0 to (dst)
+                    bne     loop            ;Repeat while D0 <> NUL
+                    unlk    a6              ;Restore stack frame
+                    rts                     ;Return
+                    end
+
+* CRAY-1
+
+    ident slice
+             V6        0               ; initialize S
+             A4        S0              ; initialize *x
+             A5        S1              ; initialize *y
+             A3        S2              ; initialize i
+    loop     S0        A3
+             JSZ       exit            ; if S0 == 0 goto exit
+             VL        A3              ; set vector length
+             V11       ,A4,1           ; load slice of x[i], stride 1
+             V12       ,A5,1           ; load slice of y[i], stride 1
+             V13       V11 *F V12      ; slice of x[i] * y[i]
+             V6        V6 +F V13       ; partial sum
+             A14       VL              ; get vector length of this iteration
+             A4        A4 + A14        ; *x = *x + VL
+             A5        A5 + A14        ; *y = *y + VL
+             A3        A3 - A14        ; i = i - VL
+             J        loop
+     exit
+
+* Go assembler
+
+Имат доста обща структура:
+
+    subroutine header
+    label:
+        instruction operand...    ; comment
+        ...
+
+- Защо да не се използва това?
+
+* Нека ги направим еднакви!
+
+Чрез собствен assembler, който след това лесно се превежда до реалния на всяка машина.
+
+* Един пример
+
+Нека разгледаме go програмата
+
+    package add
+
+    func add(a, b int) int {
+        return a + b
+    }
+
+И сега генерирания assembly
+
+* 32-bit x86 (386)
+
+    TEXT add(SB), $0-12
+        MOVL    a+4(FP), BX
+        ADDL    b+8(FP), BX
+        MOVL    BX, 12(FP)
+        RET
+
+* 64-bit x86 (amd64)
+
+    TEXT add(SB), $0-24
+        MOVQ    b+16(FP), AX
+        MOVQ    a+8(FP), CX
+        ADDQ    CX, AX
+        MOVQ    AX, 24(FP)
+        RET
+
+* 64-bit arm (arm64)
+
+    TEXT add(SB), $-8-24
+        MOVD    a(FP), R0
+        MOVD    b+8(FP), R1
+        ADD     R1, R0
+        MOVD    R0, 16(FP)
+        RET
+
+* S390 (s390x)
+
+    TEXT add(SB), $0-24
+        MOVD    a(FP), R1
+        MOVD    b+8(FP), R2
+        ADD     R2, R1, R1
+        MOVD    R1, 16(FP)
+        RET
+
+* 64-bit Power (ppc64le)
+
+    TEXT add(SB), $0-24
+        MOVD    a(FP), R2
+        MOVD    b+8(FP), R3
+        ADD     R3, R2
+        MOVD    R2, 16(FP)
+        RET
+
+* ... and so on
+
+На практика са еднакви.
+
+* Какво се печели?
+
+- Нови архитектури се добавят изключително лесно
+- Прави се само таблица с инстрункциите `real`->`go`assembly`
+- Даже програми, които четата PDF с документация на процесор и генерира такава
+
+* Пример?
+
+.link https://github.com/golang/go/blob/master/src/cmd/internal/obj/arm64/asm7.go
+
+* Повече от командир Pike
+
+.link https://www.youtube.com/watch?v=KINIAgRpkDA
+
+* Go linker
+
+- Също написан на Go. Вече доста бърз.
+
+* GODEBUG
+
+* Добре, компилира се!
+
+- Вече програмата работи
+- ... почти
+- ... прави неща, които не разбирам
+- Какво!? Сигурен съм, че имах повече от 100 MB свободна рам!
+
+* Повече информация
+
+- Можете да получите повече информация за работеща програма с флагове на GODEBUG променливата на средата:
+
+    export GODEBUG="name=flag"
+
+Пример:
+
+    export GODEBUG="gctrace=2,invalidptr=1"
+
+Позволява:
+
+- Проследяваме на всяка алокация и освобаждаване на памет (allocfreetrace)
+- Спрете конкурентния GC. Всичко става stop-the-world (gcstoptheworld)
+- Информация за всяко пускане на GC (gctrace)
+
+* ...
+
+- Показване на състоянието на scheduler-a (scheddetail и schedtrace)
+- Спрете намаляването на goroutine стековете (gcshrinkstackoff)
+- Всяка алокация да бъде на нова страница и да не се преизползват адреси (efence)
+- Много други
+
+* GOGC
+
+- Променлива на средата, подобна на GODEBUG
+- Определя колко често да се пуска garbage collector-а
+- Стойноста е колко процента трябва да стане ново алокираното пространство в heap-a спрямо "живия" heap. След стигането на тази стойност се пуска чистенето на боклук.
+- По подразбиране `GOGC=100`
+- Възможни са всякакви числа, 200, 300
+- `GOGC=off` спира събирането на боклук изцяло
+
+* GOMAXPROCS
+
+- Променлива на средата
+- Функция `GOMAXPROCS(n`int)` от пакета `runtime`
+- Определя на колко истински нишки от операционната система ще се изпълнява *вашия* Go код

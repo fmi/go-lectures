@@ -38,4 +38,8 @@
     title: 09. Go Tools
     date: 2018-12-05
     url: https://lectures.fmi.golang.bg/09-tools.slide
+10:
+    title: 10. Cgo и build дълбини
+    date: 2018-12-12
+    url: https://lectures.fmi.golang.bg/10-cgo-build.slide
 
