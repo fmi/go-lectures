@@ -42,4 +42,8 @@
     title: 10. Cgo и build дълбини
     date: 2018-12-12
     url: https://lectures.fmi.golang.bg/10-cgo-build.slide
+11:
+    title: 11. Управление на зависимости
+    date: 2018-12-19
+    url: https://lectures.fmi.golang.bg/11-dependency-management.slide
 
