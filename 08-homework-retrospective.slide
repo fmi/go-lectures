@@ -32,12 +32,12 @@ http://fmi.golang.bg/
 
 * Interfaces
 
-- pointer receiver vs value reciver
+- pointer receiver vs value reciever
 - Demo
 
 * Четете условието
 
-- Когато в условието изрично пише "ръба е част от фигурата"...
+- Когато в условието изрично пише "ръбът е част от фигурата"...
 - ... сигурно ще го тестваме
 
 * Време е за теста
